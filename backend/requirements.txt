@@ -6,3 +6,5 @@ faiss-cpu
 httpx
 pandas
 numpy
+implicit
+scipy
