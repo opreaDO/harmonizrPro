@@ -116,3 +116,21 @@ def get_bridge_recommendations(artist: str, track: str, top_k: int = 10, db: Ses
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/search_track")
+def search_track(query: str):
+    """
+    Pass-through endpoint to search Last.fm for songs by generic string query.
+    Used for the frontend typeahead search dropdown.
+    """
+    try:
+        matches = LastFMClient.search_track(query)
+        results = []
+        for match in matches:
+            results.append({
+                "name": match.get("name"),
+                "artist": match.get("artist")
+            })
+        return {"results": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

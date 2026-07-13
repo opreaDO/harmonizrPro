@@ -2,33 +2,46 @@ import { useState } from 'react'
 import './index.css'
 
 function App() {
-  const [userId, setUserId] = useState('');
   const [searchArtist, setSearchArtist] = useState('');
   const [searchTrack, setSearchTrack] = useState('');
-  const [recommendations, setRecommendations] = useState(null);
+  
+  const [searchResults, setSearchResults] = useState(null); // Last.fm search matches
+  const [recommendations, setRecommendations] = useState(null); // ML Output
+  
   const [loading, setLoading] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState(null);
 
-  const fetchRecommendations = async () => {
-    if (!userId) return;
+  const handleSearch = async (e) => {
+    e?.preventDefault();
+    if (!searchTrack) return;
+    
     setLoading(true);
+    setRecommendations(null); // Clear previous recommendations
+    setCurrentQuery(`Search Results for: ${searchTrack}`);
+    
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/recommend/${userId}`);
-      if (!response.ok) throw new Error("API Error");
-      const data = await response.json();
-      setRecommendations(data.recommendations);
+      // Append artist to track search if provided to narrow down Last.fm results
+      const query = searchArtist ? `${searchArtist} ${searchTrack}` : searchTrack;
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/search_track?query=${encodeURIComponent(query)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSearchResults(data.results || []);
+      }
     } catch (err) {
       console.error(err);
-      setRecommendations([]);
+      setSearchResults([]);
     } finally {
       setLoading(false);
     }
   }
 
-  const fetchBridgeRecommendations = async () => {
-    if (!searchArtist || !searchTrack) return;
+  const selectSongAndRecommend = async (artist, track) => {
+    setSearchResults(null); // Clear search results to transition UI to recommendations
     setLoading(true);
+    setCurrentQuery(`${artist} - ${track}`);
+    
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/bridge_recommend?artist=${encodeURIComponent(searchArtist)}&track=${encodeURIComponent(searchTrack)}`);
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/bridge_recommend?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}`);
       if (!response.ok) throw new Error("API Error");
       const data = await response.json();
       setRecommendations(data.recommendations);
@@ -41,138 +54,158 @@ function App() {
   }
 
   return (
-    <div style={{ padding: '60px 40px', maxWidth: '1440px', margin: '0 auto' }}>
-      
-      <header style={{ marginBottom: '80px', textAlign: 'center' }}>
-        <div style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(208, 188, 255, 0.1)', border: '1px solid rgba(208, 188, 255, 0.2)', borderRadius: '9999px', marginBottom: '24px' }}>
-            <span className="data-text" style={{ color: 'var(--primary-electric)', fontSize: '12px' }}>PROTOTYPE V1.1 (LAST.FM ENABLED)</span>
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-color)' }}>
+      {/* Sidebar Navigation */}
+      <aside style={{ width: '260px', backgroundColor: 'rgba(15, 23, 42, 0.6)', borderRight: '1px solid var(--glass-border)', padding: '32px 24px', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
+        <div style={{ marginBottom: '48px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#fff' }}>
+            Harmonizr <span style={{ color: 'var(--secondary-synth)' }}>Pro</span>
+          </h1>
         </div>
-        <h1 style={{ fontSize: '64px', fontWeight: '700', marginBottom: '16px', color: '#fff' }}>
-          Harmonizr <span style={{ background: 'linear-gradient(45deg, #d0bcff, #4cd7f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Pro</span>
-        </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '20px', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
-          Deep immersion musical discovery powered by ALS and PyTorch Bridging.
-        </p>
-      </header>
-
-      <main style={{ display: 'grid', gridTemplateColumns: 'minmax(350px, 1fr) 2fr', gap: '32px', alignItems: 'start' }}>
         
-        {/* Input Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          
-          {/* Bridging Panel */}
-          <div className="glass-panel" style={{ padding: '40px', borderTop: '2px solid var(--secondary-synth)' }}>
-            <h2 style={{ fontSize: '28px', marginBottom: '16px', fontWeight: '600' }}>Live Song Search</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '32px' }}>
-              Triggers the PyTorch Bridging Model to translate live Last.fm tags into ALS embeddings.
-            </p>
-            <div style={{ marginBottom: '16px' }}>
-              <label className="input-label">Artist Name</label>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '12px', transition: 'background 0.2s' }}>
+             Home
+          </a>
+          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(208, 188, 255, 0.1)', color: 'var(--primary-electric)', textDecoration: 'none', fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '12px' }}>
+             Recommendations
+          </a>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main style={{ flex: 1, padding: '40px 60px', position: 'relative', overflowY: 'auto' }}>
+        {/* Top Search Header */}
+        <header style={{ marginBottom: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ flex: 1, maxWidth: '800px' }}>
+            <form onSubmit={handleSearch} style={{ display: 'flex', gap: '16px' }}>
               <input 
                 type="text" 
                 className="input-field" 
-                placeholder="e.g. Sabrina Carpenter" 
-                value={searchArtist}
-                onChange={(e) => setSearchArtist(e.target.value)}
-              />
-            </div>
-            <div style={{ marginBottom: '32px' }}>
-              <label className="input-label">Track Name</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="e.g. Espresso" 
+                placeholder="Track Name (Required)" 
                 value={searchTrack}
                 onChange={(e) => setSearchTrack(e.target.value)}
+                style={{ flex: 2 }}
+                required
               />
-            </div>
-            <button className="btn-primary" onClick={fetchBridgeRecommendations} style={{ width: '100%', padding: '16px', fontSize: '16px' }}>
-              {loading ? 'Projecting Vector...' : 'Generate New Recommendations'}
-            </button>
-          </div>
-
-          {/* Historical ALS Panel */}
-          <div className="glass-panel" style={{ padding: '40px' }}>
-            <h2 style={{ fontSize: '28px', marginBottom: '16px', fontWeight: '600' }}>User Simulator</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '32px' }}>
-              Fetch direct ALS collaborative recommendations for historical users.
-            </p>
-            <div style={{ marginBottom: '32px' }}>
-              <label className="input-label">Target User ID</label>
               <input 
                 type="text" 
                 className="input-field" 
-                placeholder="Enter MSD Key (e.g. b80344...)" 
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                placeholder="Artist (Optional)" 
+                value={searchArtist}
+                onChange={(e) => setSearchArtist(e.target.value)}
+                style={{ flex: 1 }}
               />
-            </div>
-            <button className="btn-primary" onClick={fetchRecommendations} style={{ width: '100%', padding: '16px', fontSize: '16px', background: 'linear-gradient(45deg, #1e293b, #334155)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              {loading ? 'Running Matrix...' : 'Simulate Historical User'}
-            </button>
+              <button type="submit" className="btn-primary" style={{ padding: '0 32px' }}>
+                {loading && !recommendations && !searchResults ? 'Searching...' : 'Search'}
+              </button>
+            </form>
           </div>
-        </div>
+        </header>
 
-        {/* Results Panel */}
-        <div className="glass-panel" style={{ padding: '40px', minHeight: '500px', position: 'relative', overflow: 'hidden' }}>
-          {/* Subtle glow behind the results */}
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(76, 215, 246, 0.1) 0%, transparent 70%)', pointerEvents: 'none' }}></div>
-          
-          <h2 style={{ fontSize: '28px', marginBottom: '32px', fontWeight: '600' }}>Analysis Output</h2>
-          
-          {loading && (
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} style={{ width: '100%', height: '72px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', animation: 'pulse 1.5s infinite ease-in-out', animationDelay: `${i * 0.1}s` }}></div>
-                ))}
-             </div>
-          )}
+        {/* Hero Area */}
+        {currentQuery && (
+          <div style={{ marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+              {searchResults ? "Select a track below to bridge" : "Recommendations based on"}
+            </h2>
+            <h3 style={{ fontSize: '48px', color: '#fff', fontWeight: '700', letterSpacing: '-0.02em' }}>
+              {currentQuery}
+            </h3>
+          </div>
+        )}
 
-          {!loading && recommendations && (
-            <div>
-              {recommendations.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', zIndex: 1 }}>
-                  {recommendations.map((track, i) => (
-                    <div key={i} style={{ 
-                        padding: '20px 24px', 
-                        backgroundColor: 'rgba(6, 14, 32, 0.6)', 
-                        borderRadius: '12px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        borderLeft: '4px solid var(--secondary-synth)',
-                        transition: 'transform 0.2s',
-                        cursor: 'default'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(8px)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
-                    >
-                       <div className="data-text" style={{ opacity: 0.4, marginRight: '24px', fontSize: '14px', width: '24px' }}>0{i + 1}</div>
-                       <div className="data-text" style={{ fontSize: '18px', color: '#fff', letterSpacing: '0.02em' }}>
-                          {typeof track === 'string' ? track : track.name}
-                       </div>
-                       <div style={{ marginLeft: 'auto', padding: '4px 12px', background: 'rgba(76, 215, 246, 0.1)', borderRadius: '9999px', color: 'var(--secondary-synth)', fontSize: '12px', fontWeight: '600' }}>
-                          98.4% MATCH
-                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ padding: '32px', background: 'rgba(255, 0, 0, 0.05)', borderLeft: '4px solid var(--tertiary-rose)', borderRadius: '8px' }}>
-                  <p style={{ color: 'var(--tertiary-rose)', fontFamily: 'Inter', fontWeight: '500' }}>No mathematical matches found or invalid parameters.</p>
-                </div>
-              )}
+        {/* Empty State */}
+        {!currentQuery && !loading && (
+          <div style={{ height: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.4 }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </div>
-          )}
-          
-          {!loading && !recommendations && (
-            <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.4, border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '12px' }}>
-              <p style={{ fontFamily: 'Inter', fontSize: '16px' }}>Awaiting parameter injection...</p>
-            </div>
-          )}
-        </div>
+            <p style={{ fontSize: '18px', fontWeight: '500' }}>Search for a track in the top bar to generate AI recommendations</p>
+          </div>
+        )}
+
+        {/* Loading Skeletons */}
+        {loading && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="glass-panel" style={{ height: '96px', animation: 'pulse 1.5s infinite ease-in-out', animationDelay: `${i * 0.1}s` }}></div>
+            ))}
+          </div>
+        )}
+
+        {/* Step 1: Search Results Grid */}
+        {!loading && searchResults && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+            {searchResults.length > 0 ? (
+              searchResults.map((track, i) => (
+                <div key={i} className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'pointer', borderLeft: '4px solid var(--secondary-synth)' }}
+                     onClick={() => selectSongAndRecommend(track.artist, track.name)}
+                     onMouseEnter={(e) => {
+                       e.currentTarget.style.transform = 'translateY(-4px)';
+                       e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.5), 0 0 20px rgba(76, 215, 246, 0.1)';
+                     }}
+                     onMouseLeave={(e) => {
+                       e.currentTarget.style.transform = 'translateY(0)';
+                       e.currentTarget.style.boxShadow = '0 16px 40px 0 rgba(0, 0, 0, 0.4)';
+                     }}
+                >
+                  <div style={{ overflow: 'hidden' }}>
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', marginBottom: '4px' }}>{track.name}</div>
+                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{track.artist}</div>
+                  </div>
+                  <div style={{ marginLeft: 'auto', padding: '6px 16px', background: 'var(--primary-electric)', borderRadius: '8px', color: '#000', fontSize: '13px', fontWeight: '600' }}>
+                     Select
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ gridColumn: '1 / -1', padding: '32px', background: 'rgba(255, 0, 0, 0.05)', borderLeft: '4px solid var(--tertiary-rose)', borderRadius: '8px' }}>
+                <p style={{ color: 'var(--tertiary-rose)', fontWeight: '500' }}>No songs found on Last.fm for this query.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 2: Final Recommendations Grid */}
+        {!loading && recommendations && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+            {recommendations.length > 0 ? (
+              recommendations.map((track, i) => {
+                const trackName = typeof track === 'string' ? track : track.name;
+                const split = trackName.split(' - ');
+                const artist = split[0];
+                const title = split.slice(1).join(' - ') || trackName;
+                
+                return (
+                <div key={i} className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'pointer' }}
+                     onMouseEnter={(e) => {
+                       e.currentTarget.style.transform = 'translateY(-4px)';
+                       e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.5), 0 0 20px rgba(76, 215, 246, 0.1)';
+                     }}
+                     onMouseLeave={(e) => {
+                       e.currentTarget.style.transform = 'translateY(0)';
+                       e.currentTarget.style.boxShadow = '0 16px 40px 0 rgba(0, 0, 0, 0.4)';
+                     }}
+                >
+                  <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid rgba(255,255,255,0.08)' }}>
+                     <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--primary-electric)', fontFamily: 'Geist' }}>0{i + 1}</span>
+                  </div>
+                  <div style={{ overflow: 'hidden' }}>
+                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', marginBottom: '4px' }}>{title}</div>
+                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{artist}</div>
+                  </div>
+                </div>
+              )})
+            ) : (
+              <div style={{ gridColumn: '1 / -1', padding: '32px', background: 'rgba(255, 0, 0, 0.05)', borderLeft: '4px solid var(--tertiary-rose)', borderRadius: '8px' }}>
+                <p style={{ color: 'var(--tertiary-rose)', fontWeight: '500' }}>No recommendations could be synthesized for this query.</p>
+              </div>
+            )}
+          </div>
+        )}
       </main>
-      
+
       <style>{`
         @keyframes pulse {
           0% { opacity: 0.2; }
