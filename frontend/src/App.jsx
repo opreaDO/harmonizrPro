@@ -3,6 +3,8 @@ import './index.css'
 
 function App() {
   const [userId, setUserId] = useState('');
+  const [searchArtist, setSearchArtist] = useState('');
+  const [searchTrack, setSearchTrack] = useState('');
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,40 +24,93 @@ function App() {
     }
   }
 
+  const fetchBridgeRecommendations = async () => {
+    if (!searchArtist || !searchTrack) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/bridge_recommend?artist=${encodeURIComponent(searchArtist)}&track=${encodeURIComponent(searchTrack)}`);
+      if (!response.ok) throw new Error("API Error");
+      const data = await response.json();
+      setRecommendations(data.recommendations);
+    } catch (err) {
+      console.error(err);
+      setRecommendations([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div style={{ padding: '60px 40px', maxWidth: '1440px', margin: '0 auto' }}>
       
       <header style={{ marginBottom: '80px', textAlign: 'center' }}>
         <div style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(208, 188, 255, 0.1)', border: '1px solid rgba(208, 188, 255, 0.2)', borderRadius: '9999px', marginBottom: '24px' }}>
-            <span className="data-text" style={{ color: 'var(--primary-electric)', fontSize: '12px' }}>PROTOTYPE V1.0</span>
+            <span className="data-text" style={{ color: 'var(--primary-electric)', fontSize: '12px' }}>PROTOTYPE V1.1 (LAST.FM ENABLED)</span>
         </div>
         <h1 style={{ fontSize: '64px', fontWeight: '700', marginBottom: '16px', color: '#fff' }}>
           Harmonizr <span style={{ background: 'linear-gradient(45deg, #d0bcff, #4cd7f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Pro</span>
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '20px', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
-          Deep immersion musical discovery driven by Alternating Least Squares factorization.
+          Deep immersion musical discovery powered by ALS and PyTorch Bridging.
         </p>
       </header>
 
       <main style={{ display: 'grid', gridTemplateColumns: 'minmax(350px, 1fr) 2fr', gap: '32px', alignItems: 'start' }}>
-        {/* Input Panel */}
-        <div className="glass-panel" style={{ padding: '40px' }}>
-          <h2 style={{ fontSize: '28px', marginBottom: '32px', fontWeight: '600' }}>Discovery Engine</h2>
-          <div style={{ marginBottom: '32px' }}>
-            <label className="input-label">
-              Target User ID
-            </label>
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="Enter MSD Key (e.g. b80344...)" 
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-            />
+        
+        {/* Input Column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          
+          {/* Bridging Panel */}
+          <div className="glass-panel" style={{ padding: '40px', borderTop: '2px solid var(--secondary-synth)' }}>
+            <h2 style={{ fontSize: '28px', marginBottom: '16px', fontWeight: '600' }}>Live Song Search</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '32px' }}>
+              Triggers the PyTorch Bridging Model to translate live Last.fm tags into ALS embeddings.
+            </p>
+            <div style={{ marginBottom: '16px' }}>
+              <label className="input-label">Artist Name</label>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="e.g. Sabrina Carpenter" 
+                value={searchArtist}
+                onChange={(e) => setSearchArtist(e.target.value)}
+              />
+            </div>
+            <div style={{ marginBottom: '32px' }}>
+              <label className="input-label">Track Name</label>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="e.g. Espresso" 
+                value={searchTrack}
+                onChange={(e) => setSearchTrack(e.target.value)}
+              />
+            </div>
+            <button className="btn-primary" onClick={fetchBridgeRecommendations} style={{ width: '100%', padding: '16px', fontSize: '16px' }}>
+              {loading ? 'Projecting Vector...' : 'Generate New Recommendations'}
+            </button>
           </div>
-          <button className="btn-primary" onClick={fetchRecommendations} style={{ width: '100%', padding: '16px', fontSize: '16px' }}>
-            {loading ? 'Running ALS Matrix...' : 'Generate Recommendations'}
-          </button>
+
+          {/* Historical ALS Panel */}
+          <div className="glass-panel" style={{ padding: '40px' }}>
+            <h2 style={{ fontSize: '28px', marginBottom: '16px', fontWeight: '600' }}>User Simulator</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '32px' }}>
+              Fetch direct ALS collaborative recommendations for historical users.
+            </p>
+            <div style={{ marginBottom: '32px' }}>
+              <label className="input-label">Target User ID</label>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Enter MSD Key (e.g. b80344...)" 
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+              />
+            </div>
+            <button className="btn-primary" onClick={fetchRecommendations} style={{ width: '100%', padding: '16px', fontSize: '16px', background: 'linear-gradient(45deg, #1e293b, #334155)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              {loading ? 'Running Matrix...' : 'Simulate Historical User'}
+            </button>
+          </div>
         </div>
 
         {/* Results Panel */}
@@ -93,14 +148,18 @@ function App() {
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
                     >
                        <div className="data-text" style={{ opacity: 0.4, marginRight: '24px', fontSize: '14px', width: '24px' }}>0{i + 1}</div>
-                       <div className="data-text" style={{ fontSize: '18px', color: '#fff', letterSpacing: '0.02em' }}>{track}</div>
-                       <div style={{ marginLeft: 'auto', padding: '4px 12px', background: 'rgba(76, 215, 246, 0.1)', borderRadius: '9999px', color: 'var(--secondary-synth)', fontSize: '12px', fontWeight: '600' }}>98.4% MATCH</div>
+                       <div className="data-text" style={{ fontSize: '18px', color: '#fff', letterSpacing: '0.02em' }}>
+                          {typeof track === 'string' ? track : track.name}
+                       </div>
+                       <div style={{ marginLeft: 'auto', padding: '4px 12px', background: 'rgba(76, 215, 246, 0.1)', borderRadius: '9999px', color: 'var(--secondary-synth)', fontSize: '12px', fontWeight: '600' }}>
+                          98.4% MATCH
+                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div style={{ padding: '32px', background: 'rgba(255, 0, 0, 0.05)', borderLeft: '4px solid var(--tertiary-rose)', borderRadius: '8px' }}>
-                  <p style={{ color: 'var(--tertiary-rose)', fontFamily: 'Inter', fontWeight: '500' }}>No historical data found. Cold start protocol required.</p>
+                  <p style={{ color: 'var(--tertiary-rose)', fontFamily: 'Inter', fontWeight: '500' }}>No mathematical matches found or invalid parameters.</p>
                 </div>
               )}
             </div>
