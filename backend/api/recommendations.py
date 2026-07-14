@@ -119,13 +119,13 @@ def get_bridge_recommendations(artist: str, track: str, use_fallback: bool = Tru
         text = " ".join(tags)
         tag_vector = content_recommender.vectorizer.transform([text]).astype(np.float32).toarray()[0]
         
-        # Ensure it is exactly 5000 dims for the PyTorch Bridging Model (since we mocked the vocabulary)
-        if len(tag_vector) < 5000:
-            padded = np.zeros(5000, dtype=np.float32)
+        # Ensure it is exactly 20000 dims for the PyTorch Bridging Model
+        if len(tag_vector) < 20000:
+            padded = np.zeros(20000, dtype=np.float32)
             padded[:len(tag_vector)] = tag_vector
             tag_vector = padded
-        elif len(tag_vector) > 5000:
-            tag_vector = tag_vector[:5000]
+        elif len(tag_vector) > 20000:
+            tag_vector = tag_vector[:20000]
         
         # 3. Math to Embedding (PyTorch)
         embedding = bridge_model.predict_embedding(tag_vector) # Shape: (1, 50)

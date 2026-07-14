@@ -10,7 +10,8 @@ class BridgeTrainer:
         self.model = model.to(device)
         self.dataloader = dataloader
         self.device = device
-        self.criterion = nn.MSELoss()
+        # CosineEmbeddingLoss is mathematically superior for angular distance
+        self.criterion = nn.CosineEmbeddingLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
 
     def train_epoch(self):
@@ -19,9 +20,12 @@ class BridgeTrainer:
         for batch_x, batch_y in self.dataloader:
             batch_x, batch_y = batch_x.to(self.device), batch_y.to(self.device)
             
+            # CosineEmbeddingLoss requires a target tensor of 1s (indicating we want output and batch_y to be similar)
+            targets = torch.ones(batch_x.size(0)).to(self.device)
+            
             self.optimizer.zero_grad()
             predictions = self.model(batch_x)
-            loss = self.criterion(predictions, batch_y)
+            loss = self.criterion(predictions, batch_y, targets)
             loss.backward()
             self.optimizer.step()
             

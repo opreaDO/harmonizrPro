@@ -12,7 +12,7 @@ class ContentBasedRecommender:
         self.index_path = os.path.join(model_dir, "faiss_index.bin")
         self.metadata_path = os.path.join(model_dir, "track_metadata.pkl")
         
-        self.vectorizer = TfidfVectorizer(max_features=5000, stop_words='english')
+        self.vectorizer = TfidfVectorizer(max_features=20000, stop_words='english')
         self.index = None
         self.metadata = [] 
         self.is_trained = False
