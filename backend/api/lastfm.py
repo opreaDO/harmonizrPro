@@ -60,6 +60,35 @@ class LastFMClient:
         return tags
 
     @staticmethod
+    def get_artist_tags(artist: str):
+        """
+        Fetches the top crowdsourced tags for a specific artist.
+        Used as a fallback when a specific obscure track has no tags.
+        """
+        if not LASTFM_API_KEY:
+            return []
+            
+        params = {
+            "method": "artist.gettoptags",
+            "artist": artist,
+            "api_key": LASTFM_API_KEY,
+            "format": "json"
+        }
+        
+        try:
+            response = requests.get(LastFMClient.BASE_URL, params=params, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                if "toptags" in data and "tag" in data["toptags"]:
+                    tag_list = data["toptags"]["tag"]
+                    if isinstance(tag_list, dict):
+                        tag_list = [tag_list]
+                    return [tag_obj["name"].lower() for tag_obj in tag_list]
+        except Exception:
+            pass
+        return []
+
+    @staticmethod
     def search_track(query: str):
         """
         Searches Last.fm for a track based on a raw text query.
