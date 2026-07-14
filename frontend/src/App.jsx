@@ -162,9 +162,16 @@ function App() {
 
         {/* Loading Skeletons */}
         {loading && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="glass-panel" style={{ height: '96px', animation: 'pulse 1.5s infinite ease-in-out', animationDelay: `${i * 0.1}s` }}></div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '1000px', width: '100%' }}>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="glass-panel" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: '12px', animation: 'pulse 1.5s infinite ease-in-out', animationDelay: `${i * 0.1}s` }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)' }}></div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ height: '16px', width: '30%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+                  <div style={{ height: '14px', width: '20%', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
+                </div>
+                <div style={{ width: '80px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)' }}></div>
+              </div>
             ))}
           </div>
         )}
