@@ -58,8 +58,7 @@ def migrate_to_postgres():
                 year INT
             );
         """))
-        # Truncate just in case the script is run twice, so we don't hit duplicate key errors
-        conn.execute(text("TRUNCATE TABLE tracks;"))
+        # We removed the truncate statement here to allow the migration to resume without deleting the previous 180k rows.
 
     print("Connecting to local SQLite database...")
     sqlite_conn = sqlite3.connect(LOCAL_SQLITE_PATH)
@@ -77,7 +76,7 @@ def migrate_to_postgres():
             track_id, title, song_id, release, artist_id, artist_mbid, artist_name, duration, artist_familiarity, artist_hotttnesss, year
         ) VALUES (
             :track_id, :title, :song_id, :release, :artist_id, :artist_mbid, :artist_name, :duration, :artist_familiarity, :artist_hotttnesss, :year
-        )
+        ) ON CONFLICT (track_id) DO NOTHING
     """)
     
     while rows:

@@ -167,38 +167,69 @@ function App() {
           </div>
         )}
 
-        {/* Step 2: Final Recommendations Grid */}
+        {/* Step 2: Final Recommendations List View */}
         {!loading && recommendations && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '1000px', width: '100%' }}>
             {recommendations.length > 0 ? (
               recommendations.map((track, i) => {
                 const trackName = typeof track === 'string' ? track : track.name;
                 const split = trackName.split(' - ');
                 const artist = split[0];
                 const title = split.slice(1).join(' - ') || trackName;
+                const scoreMatch = Math.max(10, Math.floor(98 - (i * 2.5))); // Mock match percentage descending
                 
                 return (
-                <div key={i} className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'pointer' }}
+                <div key={i} className="glass-panel" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease', cursor: 'pointer', borderRadius: '12px' }}
                      onMouseEnter={(e) => {
-                       e.currentTarget.style.transform = 'translateY(-4px)';
-                       e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.5), 0 0 20px rgba(76, 215, 246, 0.1)';
+                       e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                       e.currentTarget.style.borderColor = 'rgba(208, 188, 255, 0.4)';
                      }}
                      onMouseLeave={(e) => {
-                       e.currentTarget.style.transform = 'translateY(0)';
-                       e.currentTarget.style.boxShadow = '0 16px 40px 0 rgba(0, 0, 0, 0.4)';
+                       e.currentTarget.style.backgroundColor = 'var(--glass-bg)';
+                       e.currentTarget.style.borderColor = 'var(--glass-border)';
+                     }}
+                     onClick={(e) => {
+                       const check = e.currentTarget.querySelector('.check-icon');
+                       const circle = e.currentTarget.querySelector('.check-circle');
+                       if (check.style.stroke === 'transparent') {
+                           check.style.stroke = 'var(--primary-electric)';
+                           circle.style.borderColor = 'var(--primary-electric)';
+                           circle.style.backgroundColor = 'rgba(208, 188, 255, 0.1)';
+                       } else {
+                           check.style.stroke = 'transparent';
+                           circle.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                           circle.style.backgroundColor = 'transparent';
+                       }
                      }}
                 >
-                  <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid rgba(255,255,255,0.08)' }}>
-                     <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--primary-electric)', fontFamily: 'Geist' }}>0{i + 1}</span>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: 'var(--bg-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: '16px', color: 'var(--primary-electric)', fontFamily: 'Geist' }}>{i + 1}</span>
+                    </div>
                   </div>
-                  <div style={{ overflow: 'hidden' }}>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', marginBottom: '4px' }}>{title}</div>
-                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{artist}</div>
+                  
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h4 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0, fontFamily: 'Geist' }}>{title}</h4>
+                      {i === 0 && <span style={{ background: 'var(--primary-electric)', color: '#000', padding: '2px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Top Match</span>}
+                    </div>
+                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0 }}>{artist}</p>
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', width: '90px', flexShrink: 0, marginRight: '16px' }}>
+                    <div style={{ width: '100%', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '999px', height: '6px', marginBottom: '6px', overflow: 'hidden' }}>
+                      <div style={{ background: 'var(--secondary-synth)', height: '100%', borderRadius: '999px', width: `${scoreMatch}%` }}></div>
+                    </div>
+                    <span style={{ fontSize: '10px', color: 'var(--secondary-synth)', fontFamily: 'Geist', fontWeight: '500' }}>{scoreMatch}% Match</span>
+                  </div>
+                  
+                  <div className="check-circle" style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s ease' }}>
+                     <svg className="check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="transparent" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'stroke 0.2s ease' }}><polyline points="20 6 9 17 4 12"></polyline></svg>
                   </div>
                 </div>
               )})
             ) : (
-              <div style={{ gridColumn: '1 / -1', padding: '32px', background: 'rgba(255, 0, 0, 0.05)', borderLeft: '4px solid var(--tertiary-rose)', borderRadius: '8px' }}>
+              <div style={{ padding: '32px', background: 'rgba(255, 0, 0, 0.05)', borderLeft: '4px solid var(--tertiary-rose)', borderRadius: '8px' }}>
                 <p style={{ color: 'var(--tertiary-rose)', fontWeight: '500' }}>No recommendations could be synthesized for this query.</p>
               </div>
             )}
