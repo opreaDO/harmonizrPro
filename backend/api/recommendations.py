@@ -134,10 +134,30 @@ def search_track(query: str):
     try:
         matches = LastFMClient.search_track(query)
         results = []
+        import urllib.parse
+        import requests
+        
         for match in matches:
+            name = match.get("name")
+            artist = match.get("artist")
+            image_url = None
+            
+            # Last.fm no longer returns third-party album art (returns a blank star pixel)
+            # We fetch dynamically from iTunes API instead.
+            try:
+                term = urllib.parse.quote(f"{name} {artist}")
+                itunes_res = requests.get(f"https://itunes.apple.com/search?term={term}&entity=song&limit=1", timeout=2)
+                if itunes_res.status_code == 200:
+                    data = itunes_res.json()
+                    if data.get("resultCount", 0) > 0:
+                        image_url = data["results"][0].get("artworkUrl100", "").replace("100x100bb.jpg", "300x300bb.jpg")
+            except Exception:
+                pass
+                    
             results.append({
-                "name": match.get("name"),
-                "artist": match.get("artist")
+                "name": name,
+                "artist": artist,
+                "image": image_url
             })
         return {"results": results}
     except Exception as e:
