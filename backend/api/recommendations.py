@@ -46,16 +46,17 @@ def translate_ids_to_tracks(db: Session, track_ids: List[str]) -> List[Dict[str,
         # Fallback if DB is not connected
         return [{"track_id": tid, "name": f"Unknown Track ({tid})"} for tid in track_ids]
         
-    tracks = db.query(Track).filter(Track.track_id.in_(track_ids)).all()
+    # ML model uses song_id (SO...), but the DB PK is track_id (TR...)
+    tracks = db.query(Track).filter(Track.song_id.in_(track_ids)).all()
     # Create a mapping to preserve the mathematical ordering
-    track_map = {t.track_id: {"track_id": t.track_id, "name": f"{t.artist_name} - {t.title}"} for t in tracks}
+    track_map = {t.song_id: {"track_id": t.track_id, "name": f"{t.artist_name} - {t.title}"} for t in tracks}
     
     results = []
-    for tid in track_ids:
-        if tid in track_map:
-            results.append(track_map[tid])
+    for sid in track_ids:
+        if sid in track_map:
+            results.append(track_map[sid])
         else:
-            results.append({"track_id": tid, "name": f"Unknown Track ({tid})"})
+            results.append({"track_id": sid, "name": f"Unknown Track ({sid})"})
     return results
 
 
@@ -97,6 +98,16 @@ def get_bridge_recommendations(artist: str, track: str, use_fallback: bool = Tru
             
         if not tags:
             raise HTTPException(status_code=404, detail="No acoustic tags found for this track or artist on Last.fm.")
+            
+        # Collaborative Fast-Path: If the track exists in our massive 48M ALS model, bypass PyTorch entirely!
+        # First, find the song_id for this track in our DB
+        track_row = db.query(Track).filter(Track.artist_name.ilike(artist), Track.title.ilike(track)).first()
+        if track_row and track_row.song_id in collaborative_recommender.track_to_idx:
+            track_idx = collaborative_recommender.track_to_idx[track_row.song_id]
+            ids, scores = collaborative_recommender.model.similar_items(track_idx, N=top_k+1)
+            recs = [collaborative_recommender.idx_to_track[idx] for idx in ids if idx != track_idx][:top_k]
+            translated = translate_ids_to_tracks(db, recs)
+            return {"search_query": f"{artist} - {track} (Fast-Path)", "recommendations": translated}
             
         # 2. Text to math (TF-IDF)
         text = " ".join(tags)
