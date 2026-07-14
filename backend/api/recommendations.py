@@ -76,7 +76,7 @@ def get_recommendations(user_id: str, top_k: int = 10, db: Session = Depends(get
 
 
 @router.get("/bridge_recommend", response_model=RecommendationResponse)
-def get_bridge_recommendations(artist: str, track: str, top_k: int = 10, db: Session = Depends(get_db)):
+def get_bridge_recommendations(artist: str, track: str, use_fallback: bool = True, top_k: int = 10, db: Session = Depends(get_db)):
     """
     Cold-start protocol:
     1. Fetches tags from live Last.fm API
@@ -90,8 +90,13 @@ def get_bridge_recommendations(artist: str, track: str, top_k: int = 10, db: Ses
     try:
         # 1. Fetch live tags
         tags = LastFMClient.get_track_tags(artist, track)
+        
+        # Fallback to artist tags if the specific track is too obscure
+        if not tags and use_fallback:
+            tags = LastFMClient.get_artist_tags(artist)
+            
         if not tags:
-            raise HTTPException(status_code=404, detail="No crowdsourced tags found on Last.fm for this track.")
+            raise HTTPException(status_code=404, detail="No acoustic tags found for this track or artist on Last.fm.")
             
         # 2. Text to math (TF-IDF)
         text = " ".join(tags)
@@ -165,7 +170,8 @@ async def search_track(query: str):
             results.append({
                 "name": match.get("name"),
                 "artist": match.get("artist"),
-                "image": images[i]
+                "image": images[i],
+                "mbid": match.get("mbid")
             })
             
         return {"results": results}

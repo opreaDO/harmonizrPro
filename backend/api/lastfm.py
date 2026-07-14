@@ -14,6 +14,8 @@ class LastFMClient:
         """
         Fetches the top crowdsourced tags for a specific artist and track 
         from the live Last.fm API.
+        If the API hides low-weight tags (returns empty), this will fallback
+        to aggressively scraping the raw HTML page.
         """
         if not LASTFM_API_KEY:
             raise ValueError("LASTFM_API_KEY is not set in .env")
@@ -28,21 +30,32 @@ class LastFMClient:
         
         response = requests.get(LastFMClient.BASE_URL, params=params)
         
-        if response.status_code != 200:
-            print(f"Last.fm API Error: {response.status_code} - {response.text}")
-            return []
-            
-        data = response.json()
-        
         tags = []
-        if "toptags" in data and "tag" in data["toptags"]:
-            # Last.fm returns a list or a single object depending on count
-            tag_list = data["toptags"]["tag"]
-            if isinstance(tag_list, dict):
-                tag_list = [tag_list]
-                
-            for tag_obj in tag_list:
-                tags.append(tag_obj["name"].lower())
+        if response.status_code == 200:
+            data = response.json()
+            if "toptags" in data and "tag" in data["toptags"]:
+                # Last.fm returns a list or a single object depending on count
+                tag_list = data["toptags"]["tag"]
+                if isinstance(tag_list, dict):
+                    tag_list = [tag_list]
+                    
+                for tag_obj in tag_list:
+                    tags.append(tag_obj["name"].lower())
+                    
+        # Fallback: Scrape HTML for low-weight user tags if API returns nothing
+        if not tags:
+            try:
+                import urllib.parse
+                import re
+                scrape_url = f"https://www.last.fm/music/{urllib.parse.quote(artist)}/_/{urllib.parse.quote(track)}"
+                scrape_res = requests.get(scrape_url, timeout=5)
+                if scrape_res.status_code == 200:
+                    raw_tags = re.findall(r'href="/tag/([^"]+)"', scrape_res.text)
+                    clean_tags = [urllib.parse.unquote(t).replace('+', ' ').lower() for t in raw_tags]
+                    if clean_tags:
+                        tags = list(set(clean_tags))
+            except Exception as e:
+                print(f"Error scraping tags from Last.fm HTML: {e}")
                 
         return tags
 

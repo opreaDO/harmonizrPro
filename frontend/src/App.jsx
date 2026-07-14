@@ -10,6 +10,7 @@ function App() {
   
   const [loading, setLoading] = useState(false);
   const [currentQuery, setCurrentQuery] = useState(null);
+  const [useFallback, setUseFallback] = useState(true);
 
   const handleSearch = async (e) => {
     e?.preventDefault();
@@ -41,7 +42,7 @@ function App() {
     setCurrentQuery(`${artist} - ${track}`);
     
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/bridge_recommend?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}`);
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/bridge_recommend?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&use_fallback=${useFallback}`);
       if (!response.ok) throw new Error("API Error");
       const data = await response.json();
       setRecommendations(data.recommendations);
@@ -85,15 +86,27 @@ function App() {
         <section style={{ backgroundColor: 'rgba(23, 31, 51, 0.6)', backdropFilter: 'blur(20px)', padding: '32px', borderRadius: '24px', position: 'relative', overflow: 'hidden', marginBottom: '48px', maxWidth: '1000px', width: '100%', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ position: 'absolute', top: 0, right: 0, width: '256px', height: '256px', background: 'rgba(3, 181, 211, 0.15)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0' }}></div>
           
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#dae2fd', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-              Track Search
-            </h3>
-            <p style={{ fontSize: '13px', color: '#958ea0', marginTop: '12px', fontFamily: 'Inter', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--secondary-synth)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-              The track you select below will be used as the acoustic seed to generate recommendations.
-            </p>
+          <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#dae2fd', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                Track Search
+              </h3>
+              <p style={{ fontSize: '13px', color: '#958ea0', marginTop: '12px', fontFamily: 'Inter', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--secondary-synth)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                The track you select below will be used as the acoustic seed to generate recommendations.
+              </p>
+            </div>
+            
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', zIndex: 10 }}>
+              <span style={{ fontSize: '12px', fontWeight: '600', color: useFallback ? '#03b5d3' : '#958ea0', fontFamily: 'Geist', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                Artist Fallback
+              </span>
+              <div style={{ width: '40px', height: '20px', backgroundColor: useFallback ? 'rgba(3, 181, 211, 0.2)' : '#070B14', border: `1px solid ${useFallback ? '#03b5d3' : '#494454'}`, borderRadius: '10px', position: 'relative', transition: 'all 0.3s ease' }}>
+                <div style={{ position: 'absolute', top: '1px', left: useFallback ? '21px' : '1px', width: '16px', height: '16px', backgroundColor: useFallback ? '#03b5d3' : '#958ea0', borderRadius: '50%', transition: 'all 0.3s ease' }}></div>
+              </div>
+              <input type="checkbox" checked={useFallback} onChange={(e) => setUseFallback(e.target.checked)} style={{ display: 'none' }} />
+            </label>
           </div>
           
           <form onSubmit={handleSearch} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px', position: 'relative', zIndex: 10, alignItems: 'flex-end' }}>
@@ -205,13 +218,16 @@ function App() {
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     <h4 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0, fontFamily: 'Geist' }}>{track.name}</h4>
                     <p style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0 }}>{track.artist}</p>
+                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontFamily: 'Geist', margin: '2px 0 0 0' }}>MBID: {track.mbid || 'Not available on Last.fm'}</p>
                   </div>
                   
-                  <div style={{ marginLeft: 'auto', padding: '8px 20px', background: 'var(--primary-electric)', borderRadius: '8px', color: '#000', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', transition: 'transform 0.2s', flexShrink: 0 }}
-                       onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                       onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  >
-                     Select
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', marginLeft: 'auto' }}>
+                    <div style={{ padding: '8px 20px', background: 'var(--primary-electric)', borderRadius: '8px', color: '#000', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', transition: 'transform 0.2s', flexShrink: 0 }}
+                         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                       Select
+                    </div>
                   </div>
                 </div>
               ))
@@ -277,6 +293,11 @@ function App() {
                       <div style={{ background: 'var(--secondary-synth)', height: '100%', borderRadius: '999px', width: `${scoreMatch}%` }}></div>
                     </div>
                     <span style={{ fontSize: '10px', color: 'var(--secondary-synth)', fontFamily: 'Geist', fontWeight: '500' }}>{scoreMatch}% Match</span>
+                    {track.track_id && (
+                      <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'Geist', marginTop: '4px' }}>
+                        ID: {track.track_id}
+                      </span>
+                    )}
                   </div>
                   
                   <div className="check-circle" style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s ease' }}>
