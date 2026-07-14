@@ -11,6 +11,7 @@ class CollaborativeRecommender:
         self.model_path = os.path.join(model_dir, "als_model.pkl")
         self.user_mapping_path = os.path.join(model_dir, "user_mapping.pkl")
         self.track_mapping_path = os.path.join(model_dir, "track_mapping.pkl")
+        self.user_items_path = os.path.join(model_dir, "user_items.pkl")
         
         self.model = implicit.als.AlternatingLeastSquares(factors=50, regularization=0.1, iterations=15)
         
@@ -98,6 +99,9 @@ class CollaborativeRecommender:
                 self.user_to_idx, self.idx_to_user = pickle.load(f)
             with open(self.track_mapping_path, 'rb') as f:
                 self.track_to_idx, self.idx_to_track = pickle.load(f)
+            if os.path.exists(self.user_items_path):
+                with open(self.user_items_path, 'rb') as f:
+                    self.user_items = pickle.load(f)
             self.is_trained = True
             print("Loaded existing collaborative model.")
         else:
