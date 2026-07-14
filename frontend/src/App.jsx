@@ -13,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [currentQuery, setCurrentQuery] = useState(null);
   const [useFallback, setUseFallback] = useState(true);
+  const [useSuperTags, setUseSuperTags] = useState(false);
 
   // App state
   const [currentView, setCurrentView] = useState('dashboard');
@@ -49,7 +50,7 @@ function App() {
     setCurrentQuery(`${artist} - ${track}`);
     
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/bridge_recommend?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&use_fallback=${useFallback}`);
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/bridge_recommend?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&use_fallback=${useFallback}&use_super_tags=${useSuperTags}`);
       if (!response.ok) throw new Error("API Error");
       const data = await response.json();
       setRecommendations(data.recommendations);
@@ -109,15 +110,27 @@ function App() {
               </p>
             </div>
             
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', zIndex: 10 }}>
-              <span style={{ fontSize: '12px', fontWeight: '600', color: useFallback ? '#03b5d3' : '#958ea0', fontFamily: 'Geist', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                Artist Fallback
-              </span>
-              <div style={{ width: '40px', height: '20px', backgroundColor: useFallback ? 'rgba(3, 181, 211, 0.2)' : '#070B14', border: `1px solid ${useFallback ? '#03b5d3' : '#494454'}`, borderRadius: '10px', position: 'relative', transition: 'all 0.3s ease' }}>
-                <div style={{ position: 'absolute', top: '1px', left: useFallback ? '21px' : '1px', width: '16px', height: '16px', backgroundColor: useFallback ? '#03b5d3' : '#958ea0', borderRadius: '50%', transition: 'all 0.3s ease' }}></div>
-              </div>
-              <input type="checkbox" checked={useFallback} onChange={(e) => setUseFallback(e.target.checked)} style={{ display: 'none' }} />
-            </label>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', zIndex: 10 }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: useFallback ? '#03b5d3' : '#958ea0', fontFamily: 'Geist', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                  Artist Fallback
+                </span>
+                <div style={{ width: '40px', height: '20px', backgroundColor: useFallback ? 'rgba(3, 181, 211, 0.2)' : '#070B14', border: `1px solid ${useFallback ? '#03b5d3' : '#494454'}`, borderRadius: '10px', position: 'relative', transition: 'all 0.3s ease' }}>
+                  <div style={{ position: 'absolute', top: '1px', left: useFallback ? '21px' : '1px', width: '16px', height: '16px', backgroundColor: useFallback ? '#03b5d3' : '#958ea0', borderRadius: '50%', transition: 'all 0.3s ease' }}></div>
+                </div>
+                <input type="checkbox" checked={useFallback} onChange={(e) => setUseFallback(e.target.checked)} style={{ display: 'none' }} />
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', zIndex: 10 }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: useSuperTags ? '#a078ff' : '#958ea0', fontFamily: 'Geist', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                  Super-Tags
+                </span>
+                <div style={{ width: '40px', height: '20px', backgroundColor: useSuperTags ? 'rgba(160, 120, 255, 0.2)' : '#070B14', border: `1px solid ${useSuperTags ? '#a078ff' : '#494454'}`, borderRadius: '10px', position: 'relative', transition: 'all 0.3s ease' }}>
+                  <div style={{ position: 'absolute', top: '1px', left: useSuperTags ? '21px' : '1px', width: '16px', height: '16px', backgroundColor: useSuperTags ? '#a078ff' : '#958ea0', borderRadius: '50%', transition: 'all 0.3s ease' }}></div>
+                </div>
+                <input type="checkbox" checked={useSuperTags} onChange={(e) => setUseSuperTags(e.target.checked)} style={{ display: 'none' }} />
+              </label>
+            </div>
           </div>
           
           <form onSubmit={handleSearch} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px', position: 'relative', zIndex: 10, alignItems: 'flex-end' }}>

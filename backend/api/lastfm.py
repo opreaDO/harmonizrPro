@@ -89,6 +89,44 @@ class LastFMClient:
         return []
 
     @staticmethod
+    def get_artist_super_tags(artist: str, num_similar: int = 5):
+        """
+        Fetches similar artists to the target artist and aggregates their top tags.
+        Creates a massive 'super-tag' list for extremely obscure artists.
+        """
+        if not LASTFM_API_KEY:
+            return []
+            
+        params = {
+            "method": "artist.getsimilar",
+            "artist": artist,
+            "api_key": LASTFM_API_KEY,
+            "format": "json",
+            "limit": num_similar
+        }
+        
+        super_tags = set()
+        try:
+            response = requests.get(LastFMClient.BASE_URL, params=params, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                if "similarartists" in data and "artist" in data["similarartists"]:
+                    similar = data["similarartists"]["artist"]
+                    if isinstance(similar, dict):
+                        similar = [similar]
+                    
+                    for sim_artist in similar:
+                        name = sim_artist.get("name")
+                        if name:
+                            # Fetch tags for each similar artist
+                            tags = LastFMClient.get_artist_tags(name)
+                            super_tags.update(tags)
+        except Exception as e:
+            print(f"Error fetching super tags: {e}")
+            
+        return list(super_tags)
+
+    @staticmethod
     def search_track(query: str):
         """
         Searches Last.fm for a track based on a raw text query.
