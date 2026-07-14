@@ -75,43 +75,78 @@ function App() {
 
       {/* Main Content */}
       <main style={{ flex: 1, padding: '40px 60px', position: 'relative', overflowY: 'auto' }}>
-        {/* Top Search Header */}
-        <header style={{ marginBottom: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ flex: 1, maxWidth: '800px' }}>
-            <form onSubmit={handleSearch} style={{ display: 'flex', gap: '16px' }}>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="Track Name (Required)" 
-                value={searchTrack}
-                onChange={(e) => setSearchTrack(e.target.value)}
-                style={{ flex: 2 }}
-                required
-              />
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="Artist (Optional)" 
-                value={searchArtist}
-                onChange={(e) => setSearchArtist(e.target.value)}
-                style={{ flex: 1 }}
-              />
-              <button type="submit" className="btn-primary" style={{ padding: '0 32px' }}>
-                {loading && !recommendations && !searchResults ? 'Searching...' : 'Search'}
-              </button>
-            </form>
+        {/* Top Header Text */}
+        <div style={{ marginBottom: '32px', maxWidth: '1000px' }}>
+          <h2 style={{ fontSize: '48px', fontWeight: '700', color: '#dae2fd', fontFamily: '"Hanken Grotesk"', letterSpacing: '-0.02em', margin: 0, lineHeight: '56px' }}>Discovery</h2>
+          <p style={{ fontSize: '16px', color: '#958ea0', fontFamily: 'Inter', marginTop: '4px' }}>Curate your midnight sessions.</p>
+        </div>
+
+        {/* Big Search Blob */}
+        <section style={{ backgroundColor: 'rgba(23, 31, 51, 0.6)', backdropFilter: 'blur(20px)', padding: '32px', borderRadius: '24px', position: 'relative', overflow: 'hidden', marginBottom: '48px', maxWidth: '1000px', width: '100%', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, width: '256px', height: '256px', background: 'rgba(3, 181, 211, 0.15)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0' }}></div>
+          
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#dae2fd', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+              Track Search
+            </h3>
+            <p style={{ fontSize: '13px', color: '#958ea0', marginTop: '12px', fontFamily: 'Inter', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--secondary-synth)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              The track you select below will be used as the acoustic seed to generate recommendations.
+            </p>
           </div>
-        </header>
+          
+          <form onSubmit={handleSearch} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px', position: 'relative', zIndex: 10, alignItems: 'flex-end' }}>
+            <div style={{ gridColumn: 'span 5', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#958ea0', paddingLeft: '4px', fontFamily: 'Geist' }}>Song Name</label>
+              <div style={{ position: 'relative' }}>
+                <svg style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#958ea0' }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Midnight City" 
+                  value={searchTrack}
+                  onChange={(e) => setSearchTrack(e.target.value)}
+                  style={{ width: '100%', height: '54px', backgroundColor: '#070B14', border: '1px solid #494454', borderRadius: '12px', padding: '0 16px 0 48px', color: '#dae2fd', fontSize: '16px', fontFamily: 'Inter', outline: 'none', transition: 'box-shadow 0.3s, border-color 0.3s', boxSizing: 'border-box' }}
+                  onFocus={(e) => { e.target.style.borderColor = '#03b5d3'; e.target.style.boxShadow = '0 0 8px rgba(3, 181, 211, 0.4)' }}
+                  onBlur={(e) => { e.target.style.borderColor = '#494454'; e.target.style.boxShadow = 'none' }}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div style={{ gridColumn: 'span 5', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#958ea0', paddingLeft: '4px', fontFamily: 'Geist' }}>Artist Name</label>
+              <div style={{ position: 'relative' }}>
+                <svg style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#958ea0' }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <input 
+                  type="text" 
+                  placeholder="e.g. M83" 
+                  value={searchArtist}
+                  onChange={(e) => setSearchArtist(e.target.value)}
+                  style={{ width: '100%', height: '54px', backgroundColor: '#070B14', border: '1px solid #494454', borderRadius: '12px', padding: '0 16px 0 48px', color: '#dae2fd', fontSize: '16px', fontFamily: 'Inter', outline: 'none', transition: 'box-shadow 0.3s, border-color 0.3s', boxSizing: 'border-box' }}
+                  onFocus={(e) => { e.target.style.borderColor = '#03b5d3'; e.target.style.boxShadow = '0 0 8px rgba(3, 181, 211, 0.4)' }}
+                  onBlur={(e) => { e.target.style.borderColor = '#494454'; e.target.style.boxShadow = 'none' }}
+                />
+              </div>
+            </div>
+            
+            <div style={{ gridColumn: 'span 2' }}>
+              <button type="submit" style={{ width: '100%', height: '54px', borderRadius: '12px', background: 'linear-gradient(135deg, #a078ff 0%, #03b5d3 100%)', color: '#000', fontWeight: '700', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', border: 'none', boxShadow: '0 8px 20px rgba(3, 181, 211, 0.2)', fontFamily: '"Hanken Grotesk"' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                {loading && !recommendations && !searchResults ? '...' : 'SEARCH'}
+              </button>
+            </div>
+          </form>
+        </section>
 
         {/* Hero Area */}
         {currentQuery && (
-          <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-              {searchResults ? "Select a track below to bridge" : "Recommendations based on"}
-            </h2>
-            <h3 style={{ fontSize: '48px', color: '#fff', fontWeight: '700', letterSpacing: '-0.02em' }}>
-              {currentQuery}
-            </h3>
+          <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1000px' }}>
+            <div>
+              <h3 style={{ fontSize: '32px', color: '#fff', fontWeight: '600', letterSpacing: '-0.01em', margin: 0, fontFamily: '"Hanken Grotesk"' }}>
+                {searchResults ? "Search Results" : "Recommendations"}
+              </h3>
+            </div>
           </div>
         )}
 
