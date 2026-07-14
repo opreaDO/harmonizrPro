@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Dashboard from './Dashboard'
+import ConnectPopup from './ConnectPopup'
 import './index.css'
 
 function App() {
@@ -11,6 +13,11 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [currentQuery, setCurrentQuery] = useState(null);
   const [useFallback, setUseFallback] = useState(true);
+
+  // App state
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [lastFmUsername, setLastFmUsername] = useState(() => localStorage.getItem('lastFmUsername') || '');
+  const [showPopup, setShowPopup] = useState(() => !localStorage.getItem('lastFmUsername'));
 
   const handleSearch = async (e) => {
     e?.preventDefault();
@@ -65,10 +72,10 @@ function App() {
         </div>
         
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '12px', transition: 'background 0.2s' }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('dashboard'); }} style={{ padding: '12px 16px', borderRadius: '8px', color: currentView === 'dashboard' ? 'var(--primary-electric)' : 'var(--text-secondary)', backgroundColor: currentView === 'dashboard' ? 'rgba(208, 188, 255, 0.1)' : 'transparent', textDecoration: 'none', fontSize: '15px', fontWeight: currentView === 'dashboard' ? '600' : '500', display: 'flex', alignItems: 'center', gap: '12px', transition: 'background 0.2s' }}>
              Home
           </a>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(208, 188, 255, 0.1)', color: 'var(--primary-electric)', textDecoration: 'none', fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('recommendations'); }} style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: currentView === 'recommendations' ? 'rgba(208, 188, 255, 0.1)' : 'transparent', color: currentView === 'recommendations' ? 'var(--primary-electric)' : 'var(--text-secondary)', textDecoration: 'none', fontSize: '15px', fontWeight: currentView === 'recommendations' ? '600' : '500', display: 'flex', alignItems: 'center', gap: '12px' }}>
              Recommendations
           </a>
         </nav>
@@ -76,6 +83,10 @@ function App() {
 
       {/* Main Content */}
       <main style={{ flex: 1, padding: '40px 60px', position: 'relative', overflowY: 'auto' }}>
+        {currentView === 'dashboard' ? (
+          <Dashboard username={lastFmUsername} />
+        ) : (
+          <>
         {/* Top Header Text */}
         <div style={{ marginBottom: '32px', maxWidth: '1000px' }}>
           <h2 style={{ fontSize: '48px', fontWeight: '700', color: '#dae2fd', fontFamily: '"Hanken Grotesk"', letterSpacing: '-0.02em', margin: 0, lineHeight: '56px' }}>Discovery</h2>
@@ -312,7 +323,20 @@ function App() {
             )}
           </div>
         )}
+        </>
+        )}
       </main>
+
+      {showPopup && (
+        <ConnectPopup 
+          onSubmit={(username) => {
+            setLastFmUsername(username);
+            localStorage.setItem('lastFmUsername', username);
+            setShowPopup(false);
+          }}
+          onSkip={() => setShowPopup(false)}
+        />
+      )}
 
       <style>{`
         @keyframes pulse {

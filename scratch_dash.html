@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Harmonizr Pro - Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Hanken+Grotesk:wght@400;600;700;800;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#283044",
+                        "inverse-primary": "#6d3bd7",
+                        "outline": "#958ea0",
+                        "on-surface": "#dae2fd",
+                        "tertiary-fixed-dim": "#ffb2b7",
+                        "tertiary-container": "#ff516a",
+                        "on-surface-variant": "#cbc3d7",
+                        "surface-container": "#171f33",
+                        "on-tertiary": "#67001b",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#5516be",
+                        "on-secondary-fixed": "#001f26",
+                        "background": "#0b1326",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "secondary-fixed": "#acedff",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#e9ddff",
+                        "surface": "#0b1326",
+                        "on-primary-container": "#340080",
+                        "secondary-container": "#03b5d3",
+                        "outline-variant": "#494454",
+                        "on-primary": "#3c0091",
+                        "surface-container-lowest": "#060e20",
+                        "on-tertiary-fixed-variant": "#92002a",
+                        "surface-variant": "#2d3449",
+                        "on-secondary-container": "#00424e",
+                        "tertiary": "#ffb2b7",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#40000d",
+                        "inverse-surface": "#dae2fd",
+                        "on-secondary": "#003640",
+                        "on-tertiary-container": "#5b0017",
+                        "tertiary-fixed": "#ffdadb",
+                        "primary": "#d0bcff",
+                        "surface-bright": "#31394d",
+                        "on-primary-fixed": "#23005c",
+                        "surface-dim": "#0b1326",
+                        "secondary": "#4cd7f6",
+                        "primary-container": "#a078ff",
+                        "surface-container-low": "#131b2e",
+                        "on-background": "#dae2fd",
+                        "surface-tint": "#d0bcff",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "surface-container-highest": "#2d3449",
+                        "surface-container-high": "#222a3d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-unit": "8px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-xl": ["Hanken Grotesk"],
+                        "label-caps": ["Geist"],
+                        "display-data": ["Geist"],
+                        "headline-lg-mobile": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                        "display-data": ["24px", {"lineHeight": "32px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(23, 31, 51, 0.6) 0%, rgba(11, 19, 38, 0.4) 100%);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        .glow-text {
+            text-shadow: 0 0 16px rgba(208, 188, 255, 0.3);
+        }
+        .chart-bar-glow {
+            box-shadow: 0 0 12px rgba(76, 215, 246, 0.4);
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex antialiased selection:bg-primary/30 selection:text-primary">
+<!-- SideNavBar (Desktop) -->
+<nav class="fixed left-0 top-0 h-full z-40 hidden lg:flex flex-col py-8 bg-surface-container-lowest/90 dark:bg-surface-container-lowest/90 backdrop-blur-2xl text-primary dark:text-primary-fixed-dim font-label-caps text-label-caps docked left-0 h-full w-64 border-r border-white/10 shadow-2xl">
+<div class="px-6 mb-12">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-[2px]">
+<img alt="Harmonizr Pro Logo" class="w-full h-full object-cover rounded-full mix-blend-screen opacity-90" data-alt="A highly detailed geometric abstract logo featuring a stylized soundwave converging with a pristine vinyl record silhouette, illuminated by cinematic neon purple and teal lighting against a pure black background, reflecting a premium music studio environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuFUlOJCilPcptQSA4Ahwd-AtEGCzjsNYNZl02W3wVFpMAaEplLNpUp-8VRAGECmMwaipesw9ZHV4lOrT83L5WOIbIvKEMW-tN_wlWh32OVKUY0721Pw6az4jthI7-YliHMSbZPYbWsS6jtwI7_2dAA4_Ol657qasI000O3zRFO3pMXCPc0IAPzFqmvArmwQPAAZ-Z-phNS5UYqI2MRXcE6d25Bzyyq_G_DPnmePC5kPgw6uRiGwA9"/>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg font-black text-primary !text-xl !leading-tight tracking-tight">Harmonizr Pro</h1>
+<p class="text-outline text-[10px] tracking-widest uppercase mt-1">Midnight Muse</p>
+</div>
+</div>
+</div>
+<div class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">recommend</span>
+<span>Recommendations</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg bg-primary-container/20 text-primary border-r-4 border-primary Active: translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span>Settings</span>
+</a>
+</div>
+<div class="px-6 mt-auto">
+<button class="w-full py-3 mb-6 rounded-lg bg-gradient-to-r from-inverse-primary to-secondary text-white font-label-caps tracking-widest shadow-[0_0_20px_rgba(109,59,215,0.3)] hover:shadow-[0_0_30px_rgba(76,215,246,0.4)] transition-all duration-300">
+                Connect Account
+            </button>
+<div class="space-y-2 border-t border-white/10 pt-4">
+<a class="flex items-center gap-4 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:bg-white/5 transition-all opacity-70" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:bg-white/5 transition-all opacity-70" href="#">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 lg:ml-64 pb-28 lg:pb-12 pt-8 lg:pt-12 px-margin-mobile lg:px-margin-desktop max-w-container-max mx-auto w-full">
+<!-- Header Section -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-xl text-headline-lg-mobile md:text-headline-xl text-on-background glow-text mb-2">Insights Matrix</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">Deep dive into your auditory landscape. Analyzing patterns across frequencies, genres, and temporal habits.</p>
+</div>
+<!-- Time Filter -->
+<div class="flex bg-surface-container rounded-full p-1 border border-white/5 self-start md:self-end">
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps text-outline hover:text-on-background transition-colors">30D</button>
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps bg-surface-variant text-on-background shadow-md">6M</button>
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps text-outline hover:text-on-background transition-colors">YTD</button>
+<button class="px-6 py-2 rounded-full font-label-caps text-label-caps text-outline hover:text-on-background transition-colors">ALL</button>
+</div>
+</header>
+<!-- KPI Stats Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Stat 1 -->
+<div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-widest">Total Scrobbling</span>
+<span class="material-symbols-outlined text-primary">graphic_eq</span>
+</div>
+<div class="font-display-data text-display-data text-on-background text-4xl lg:text-5xl mb-2">142.8<span class="text-lg text-primary">k</span></div>
+<div class="font-body-sm text-body-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> +12.4% vs last period
+                </div>
+</div>
+<!-- Stat 2 -->
+<div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-secondary/10 rounded-full blur-2xl group-hover:bg-secondary/20 transition-all duration-500"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-widest">Top Decade</span>
+<span class="material-symbols-outlined text-secondary">album</span>
+</div>
+<div class="font-display-data text-display-data text-on-background text-4xl lg:text-5xl mb-2">1990<span class="text-lg text-secondary">s</span></div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">34% of total listening</div>
+</div>
+<!-- Stat 3 -->
+<div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-tertiary/10 rounded-full blur-2xl group-hover:bg-tertiary/20 transition-all duration-500"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-widest">Sonic Entropy</span>
+<span class="material-symbols-outlined text-tertiary">blur_on</span>
+</div>
+<div class="font-display-data text-display-data text-on-background text-4xl lg:text-5xl mb-2">8.4<span class="text-lg text-tertiary">/10</span></div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">High genre variance detected</div>
+</div>
+</div>
+<!-- Bento Grid Dashboard -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Heatmap (Large Card) -->
+<div class="lg:col-span-8 glass-panel rounded-xl p-6 flex flex-col min-h-[400px]">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-lg text-[20px] font-semibold text-on-background flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary chart-bar-glow"></span>
+                        Temporal Listening Heatmap
+                    </h3>
+<button class="text-outline hover:text-on-background transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="flex-1 flex flex-col justify-end relative">
+<!-- Y Axis Labels -->
+<div class="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between text-[10px] font-label-caps text-outline-variant py-2">
+<span>24h</span><span>18h</span><span>12h</span><span>06h</span><span>00h</span>
+</div>
+<!-- Grid Container -->
+<div class="ml-10 h-full flex flex-col gap-1 pb-6">
+<!-- Generative rows for fake heatmap -->
+<div class="flex-1 flex gap-1">
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+<div class="flex-1 bg-secondary/10 rounded-sm"></div>
+<div class="flex-1 bg-secondary/30 rounded-sm"></div>
+<div class="flex-1 bg-secondary/80 chart-bar-glow rounded-sm"></div>
+<div class="flex-1 bg-secondary/90 chart-bar-glow rounded-sm"></div>
+<div class="flex-1 bg-secondary/50 rounded-sm"></div>
+</div>
+<div class="flex-1 flex gap-1">
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+<div class="flex-1 bg-secondary/20 rounded-sm"></div>
+<div class="flex-1 bg-secondary/60 rounded-sm"></div>
+<div class="flex-1 bg-secondary/100 chart-bar-glow rounded-sm"></div>
+<div class="flex-1 bg-secondary/70 rounded-sm"></div>
+<div class="flex-1 bg-secondary/30 rounded-sm"></div>
+<div class="flex-1 bg-secondary/10 rounded-sm"></div>
+</div>
+<div class="flex-1 flex gap-1">
+<div class="flex-1 bg-secondary/10 rounded-sm"></div>
+<div class="flex-1 bg-secondary/40 rounded-sm"></div>
+<div class="flex-1 bg-secondary/80 chart-bar-glow rounded-sm"></div>
+<div class="flex-1 bg-secondary/90 chart-bar-glow rounded-sm"></div>
+<div class="flex-1 bg-secondary/50 rounded-sm"></div>
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+</div>
+<div class="flex-1 flex gap-1">
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+<div class="flex-1 bg-secondary/20 rounded-sm"></div>
+<div class="flex-1 bg-secondary/40 rounded-sm"></div>
+<div class="flex-1 bg-secondary/10 rounded-sm"></div>
+<div class="flex-1 bg-surface-container rounded-sm"></div>
+</div>
+</div>
+<!-- X Axis Labels -->
+<div class="ml-10 flex justify-between text-[10px] font-label-caps text-outline-variant uppercase">
+<span class="flex-1 text-center">Mon</span>
+<span class="flex-1 text-center">Tue</span>
+<span class="flex-1 text-center">Wed</span>
+<span class="flex-1 text-center text-secondary">Thu</span>
+<span class="flex-1 text-center text-on-background font-bold">Fri</span>
+<span class="flex-1 text-center text-on-background font-bold">Sat</span>
+<span class="flex-1 text-center">Sun</span>
+</div>
+</div>
+</div>
+<!-- Top Artists (Tall Card) -->
+<div class="lg:col-span-4 glass-panel rounded-xl p-6 flex flex-col h-[400px]">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-lg text-[20px] font-semibold text-on-background flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">star</span>
+                        Top Resonance
+                    </h3>
+</div>
+<div class="flex-1 overflow-y-auto pr-2 space-y-4">
+<!-- Artist 1 -->
+<div class="group cursor-pointer">
+<div class="flex justify-between text-body-sm font-body-sm mb-1">
+<span class="text-on-background font-medium">Radiohead</span>
+<span class="text-outline font-display-data text-[12px]">2.4k plays</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-container to-primary w-[85%] rounded-full group-hover:brightness-125 transition-all"></div>
+</div>
+</div>
+<!-- Artist 2 -->
+<div class="group cursor-pointer">
+<div class="flex justify-between text-body-sm font-body-sm mb-1">
+<span class="text-on-background font-medium">Massive Attack</span>
+<span class="text-outline font-display-data text-[12px]">1.8k plays</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-container to-primary w-[65%] rounded-full group-hover:brightness-125 transition-all opacity-90"></div>
+</div>
+</div>
+<!-- Artist 3 -->
+<div class="group cursor-pointer">
+<div class="flex justify-between text-body-sm font-body-sm mb-1">
+<span class="text-on-background font-medium">Burial</span>
+<span class="text-outline font-display-data text-[12px]">1.2k plays</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-container to-primary w-[45%] rounded-full group-hover:brightness-125 transition-all opacity-80"></div>
+</div>
+</div>
+<!-- Artist 4 -->
+<div class="group cursor-pointer">
+<div class="flex justify-between text-body-sm font-body-sm mb-1">
+<span class="text-on-background font-medium">Portishead</span>
+<span class="text-outline font-display-data text-[12px]">980 plays</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-container to-primary w-[35%] rounded-full group-hover:brightness-125 transition-all opacity-70"></div>
+</div>
+</div>
+<!-- Artist 5 -->
+<div class="group cursor-pointer">
+<div class="flex justify-between text-body-sm font-body-sm mb-1">
+<span class="text-on-background font-medium">Aphex Twin</span>
+<span class="text-outline font-display-data text-[12px]">850 plays</span>
+</div>
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-container to-primary w-[25%] rounded-full group-hover:brightness-125 transition-all opacity-60"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Genre Cloud (Wide Card) -->
+<div class="lg:col-span-12 glass-panel rounded-xl p-6 relative overflow-hidden min-h-[300px] flex flex-col items-center justify-center">
+<!-- Abstract background texture for the cloud -->
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary via-surface-container to-background pointer-events-none"></div>
+<h3 class="absolute top-6 left-6 font-headline-lg text-[20px] font-semibold text-on-background flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[20px]">bubble</span>
+                    Sonic Taxonomy
+                </h3>
+<!-- Fake Word Cloud Layout via Flex/Absolute positioning simulating organic spread -->
+<div class="relative w-full max-w-3xl h-48 mt-8 flex flex-wrap items-center justify-center gap-4 content-center">
+<span class="text-4xl font-headline-lg font-black text-on-background glow-text cursor-crosshair hover:scale-110 transition-transform">Trip-Hop</span>
+<span class="text-2xl font-body-md text-primary opacity-80 cursor-crosshair hover:scale-110 transition-transform">IDM</span>
+<span class="text-3xl font-headline-lg font-bold text-secondary cursor-crosshair hover:scale-110 transition-transform">Ambient</span>
+<span class="text-xl font-label-caps tracking-widest text-tertiary opacity-90 cursor-crosshair hover:scale-110 transition-transform">Shoegaze</span>
+<span class="text-lg font-body-sm text-outline cursor-crosshair hover:scale-110 transition-transform">Post-Punk</span>
+<span class="text-2xl font-headline-lg text-primary-fixed-dim cursor-crosshair hover:scale-110 transition-transform">Downtempo</span>
+<span class="text-sm font-label-caps text-outline-variant cursor-crosshair hover:scale-110 transition-transform">Glitch</span>
+<span class="text-3xl font-headline-lg font-semibold text-inverse-primary opacity-90 cursor-crosshair hover:scale-110 transition-transform">Electronic</span>
+<span class="text-lg font-body-sm text-secondary-fixed-dim cursor-crosshair hover:scale-110 transition-transform">Dream Pop</span>
+<span class="text-xl font-body-md text-on-surface-variant cursor-crosshair hover:scale-110 transition-transform">Art Rock</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex items-center justify-between px-margin-desktop py-4 bg-surface-container/95 dark:bg-surface-container/95 backdrop-blur-[60px] text-secondary dark:text-secondary-fixed font-body-sm text-body-sm font-display-data text-display-data text-secondary docked full-width bottom-0 h-24 border-t border-white/20 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:hidden">
+<a class="flex flex-col items-center justify-center gap-1 w-16 text-outline hover:text-secondary-container transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-caps text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 w-16 text-secondary font-bold scale-110 Active: scale-90 duration-150" href="#">
+<div class="relative">
+<div class="absolute inset-0 bg-secondary/20 blur-md rounded-full"></div>
+<span class="material-symbols-outlined text-[24px] relative z-10" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+</div>
+<span class="font-label-caps text-[10px] relative z-10">Insights</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 w-16 text-outline hover:text-secondary-container transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">explore</span>
+<span class="font-label-caps text-[10px]">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center gap-1 w-16 text-outline hover:text-secondary-container transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">sync</span>
+<span class="font-label-caps text-[10px]">Sync</span>
+</a>
+</nav>
+</body></html>

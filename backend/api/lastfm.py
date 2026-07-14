@@ -83,3 +83,41 @@ class LastFMClient:
                 matches = [matches]
             return matches
         return []
+
+    @staticmethod
+    def get_user_info(username: str):
+        params = {"method": "user.getinfo", "user": username, "api_key": LASTFM_API_KEY, "format": "json"}
+        res = requests.get(LastFMClient.BASE_URL, params=params)
+        if res.status_code == 200:
+            return res.json().get("user", {})
+        return {}
+
+    @staticmethod
+    def get_user_top_artists(username: str, limit: int = 5):
+        params = {"method": "user.gettopartists", "user": username, "api_key": LASTFM_API_KEY, "format": "json", "limit": limit}
+        res = requests.get(LastFMClient.BASE_URL, params=params)
+        if res.status_code == 200:
+            artists = res.json().get("topartists", {}).get("artist", [])
+            if isinstance(artists, dict): artists = [artists]
+            return artists
+        return []
+
+    @staticmethod
+    def get_user_top_tracks(username: str, limit: int = 5):
+        params = {"method": "user.gettoptracks", "user": username, "api_key": LASTFM_API_KEY, "format": "json", "limit": limit}
+        res = requests.get(LastFMClient.BASE_URL, params=params)
+        if res.status_code == 200:
+            tracks = res.json().get("toptracks", {}).get("track", [])
+            if isinstance(tracks, dict): tracks = [tracks]
+            return tracks
+        return []
+
+    @staticmethod
+    def get_user_recent_tracks(username: str, limit: int = 5):
+        params = {"method": "user.getrecenttracks", "user": username, "api_key": LASTFM_API_KEY, "format": "json", "limit": limit}
+        res = requests.get(LastFMClient.BASE_URL, params=params)
+        if res.status_code == 200:
+            tracks = res.json().get("recenttracks", {}).get("track", [])
+            if isinstance(tracks, dict): tracks = [tracks]
+            return tracks
+        return []

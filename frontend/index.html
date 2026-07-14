@@ -8,6 +8,56 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Hanken+Grotesk:wght@500;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-on-surface": "#283044",
+                        "inverse-primary": "#6d3bd7",
+                        "outline": "#958ea0",
+                        "on-surface": "#dae2fd",
+                        "on-surface-variant": "#cbc3d7",
+                        "surface-container": "#171f33",
+                        "background": "#0b1326",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface": "#0b1326",
+                        "on-primary-container": "#340080",
+                        "secondary-container": "#03b5d3",
+                        "outline-variant": "#494454",
+                        "on-primary": "#3c0091",
+                        "surface-container-lowest": "#060e20",
+                        "surface-variant": "#2d3449",
+                        "tertiary": "#ffb2b7",
+                        "error": "#ffb4ab",
+                        "inverse-surface": "#dae2fd",
+                        "primary": "#d0bcff",
+                        "surface-bright": "#31394d",
+                        "surface-dim": "#0b1326",
+                        "secondary": "#4cd7f6",
+                        "primary-container": "#a078ff",
+                        "surface-container-low": "#131b2e",
+                        "on-background": "#dae2fd",
+                        "surface-tint": "#d0bcff",
+                        "surface-container-highest": "#2d3449",
+                        "surface-container-high": "#222a3d"
+                    },
+                    fontFamily: {
+                        "headline-lg": ['"Hanken Grotesk"', 'sans-serif'],
+                        "body-sm": ['Inter', 'sans-serif'],
+                        "body-md": ['Inter', 'sans-serif'],
+                        "headline-xl": ['"Hanken Grotesk"', 'sans-serif'],
+                        "label-caps": ['Geist', 'monospace'],
+                        "display-data": ['Geist', 'monospace'],
+                        "headline-lg-mobile": ['"Hanken Grotesk"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
   </head>
   <body>
     <div id="root"></div>

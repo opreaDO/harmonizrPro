@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.api import recommendations
+from backend.api import recommendations, users
 
 app = FastAPI(title="Harmonizr Pro API", version="1.0")
 
@@ -15,6 +15,7 @@ app.add_middleware(
 
 # Register our recommendation routes
 app.include_router(recommendations.router, prefix="/api/v1")
+app.include_router(users.router, prefix="/api/v1")
 
 @app.get("/")
 def read_root():
