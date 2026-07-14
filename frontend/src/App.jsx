@@ -134,27 +134,37 @@ function App() {
           </div>
         )}
 
-        {/* Step 1: Search Results Grid */}
+        {/* Step 1: Search Results List View */}
         {!loading && searchResults && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '1000px', width: '100%' }}>
             {searchResults.length > 0 ? (
               searchResults.map((track, i) => (
-                <div key={i} className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'pointer', borderLeft: '4px solid var(--secondary-synth)' }}
+                <div key={i} className="glass-panel" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease', cursor: 'pointer', borderRadius: '12px', borderLeft: '4px solid var(--secondary-synth)' }}
                      onClick={() => selectSongAndRecommend(track.artist, track.name)}
                      onMouseEnter={(e) => {
-                       e.currentTarget.style.transform = 'translateY(-4px)';
-                       e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.5), 0 0 20px rgba(76, 215, 246, 0.1)';
+                       e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                       e.currentTarget.style.borderColor = 'rgba(76, 215, 246, 0.4)';
                      }}
                      onMouseLeave={(e) => {
-                       e.currentTarget.style.transform = 'translateY(0)';
-                       e.currentTarget.style.boxShadow = '0 16px 40px 0 rgba(0, 0, 0, 0.4)';
+                       e.currentTarget.style.backgroundColor = 'var(--glass-bg)';
+                       e.currentTarget.style.borderColor = 'var(--glass-border)';
                      }}
                 >
-                  <div style={{ overflow: 'hidden' }}>
-                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', marginBottom: '4px' }}>{track.name}</div>
-                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{track.artist}</div>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: 'var(--bg-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(76, 215, 246, 0.15), rgba(139, 92, 246, 0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary-synth)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                    </div>
                   </div>
-                  <div style={{ marginLeft: 'auto', padding: '6px 16px', background: 'var(--primary-electric)', borderRadius: '8px', color: '#000', fontSize: '13px', fontWeight: '600' }}>
+
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <h4 style={{ fontSize: '16px', fontWeight: '500', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0, fontFamily: 'Geist' }}>{track.name}</h4>
+                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0 }}>{track.artist}</p>
+                  </div>
+                  
+                  <div style={{ marginLeft: 'auto', padding: '8px 20px', background: 'var(--primary-electric)', borderRadius: '8px', color: '#000', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', transition: 'transform 0.2s', flexShrink: 0 }}
+                       onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                       onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  >
                      Select
                   </div>
                 </div>
