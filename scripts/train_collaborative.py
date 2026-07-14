@@ -56,6 +56,10 @@ play_counts = df['play_count'].values.astype(np.float32)
 
 user_items = csr_matrix((play_counts, (user_indices, track_indices)), shape=(len(unique_users), len(unique_tracks)))
 
+print("Applying BM25 weighting to eliminate popularity bias...")
+from implicit.nearest_neighbours import bm25_weight
+user_items = bm25_weight(user_items, K1=100, B=0.8)
+
 # ==============================================================================
 # OVERFITTING CHECK (OPTIONAL)
 # ==============================================================================

@@ -100,14 +100,16 @@ def get_bridge_recommendations(artist: str, track: str, use_fallback: bool = Tru
             raise HTTPException(status_code=404, detail="No acoustic tags found for this track or artist on Last.fm.")
             
         # Collaborative Fast-Path: If the track exists in our massive 48M ALS model, bypass PyTorch entirely!
-        # First, find the song_id for this track in our DB
-        track_row = db.query(Track).filter(Track.artist_name.ilike(artist), Track.title.ilike(track)).first()
-        if track_row and track_row.song_id in collaborative_recommender.track_to_idx:
-            track_idx = collaborative_recommender.track_to_idx[track_row.song_id]
-            ids, scores = collaborative_recommender.model.similar_items(track_idx, N=top_k+1)
-            recs = [collaborative_recommender.idx_to_track[idx] for idx in ids if idx != track_idx][:top_k]
-            translated = translate_ids_to_tracks(db, recs)
-            return {"search_query": f"{artist} - {track} (Fast-Path)", "recommendations": translated}
+        # First, find the song_id for this track in our DB. Since there are multiple versions of songs (e.g. remastered),
+        # we check ALL of them to ensure we don't accidentally miss the Fast-Path.
+        track_rows = db.query(Track).filter(Track.artist_name.ilike(artist), Track.title.ilike(track)).all()
+        for track_row in track_rows:
+            if track_row.song_id in collaborative_recommender.track_to_idx:
+                track_idx = collaborative_recommender.track_to_idx[track_row.song_id]
+                ids, scores = collaborative_recommender.model.similar_items(track_idx, N=top_k+1)
+                recs = [collaborative_recommender.idx_to_track[idx] for idx in ids if idx != track_idx][:top_k]
+                translated = translate_ids_to_tracks(db, recs)
+                return {"search_query": f"{artist} - {track} (Fast-Path)", "recommendations": translated}
             
         # 2. Text to math (TF-IDF)
         text = " ".join(tags)
@@ -126,8 +128,14 @@ def get_bridge_recommendations(artist: str, track: str, use_fallback: bool = Tru
         
         # 4. Find Nearest Neighbors in ALS Space
         item_factors = collaborative_recommender.model.item_factors
-        # Dot product of the new vector against all 193k historical vectors
-        scores = np.dot(item_factors, embedding[0])
+        
+        # Normalize vectors to unit length (Cosine Similarity) to ignore magnitude/popularity
+        norms = np.linalg.norm(item_factors, axis=1)
+        norms[norms == 0] = 1e-10
+        normalized_factors = item_factors / norms[:, np.newaxis]
+        
+        # Pure angle-based correlation
+        scores = np.dot(normalized_factors, embedding[0])
         top_indices = np.argsort(scores)[::-1][:top_k]
         
         recs = [collaborative_recommender.idx_to_track[idx] for idx in top_indices]
