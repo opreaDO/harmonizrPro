@@ -126,39 +126,48 @@ def get_bridge_recommendations(artist: str, track: str, top_k: int = 10, db: Ses
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/search_track")
-def search_track(query: str):
+async def search_track(query: str):
     """
     Pass-through endpoint to search Last.fm for songs by generic string query.
     Used for the frontend typeahead search dropdown.
+    Fetches iTunes album artwork concurrently for performance.
     """
     try:
-        matches = LastFMClient.search_track(query)
-        results = []
+        import asyncio
+        import httpx
         import urllib.parse
-        import requests
         
-        for match in matches:
-            name = match.get("name")
-            artist = match.get("artist")
-            image_url = None
-            
-            # Last.fm no longer returns third-party album art (returns a blank star pixel)
-            # We fetch dynamically from iTunes API instead.
+        matches = LastFMClient.search_track(query)
+        
+        async def fetch_itunes_image(name, artist, client):
             try:
                 term = urllib.parse.quote(f"{name} {artist}")
-                itunes_res = requests.get(f"https://itunes.apple.com/search?term={term}&entity=song&limit=1", timeout=2)
-                if itunes_res.status_code == 200:
-                    data = itunes_res.json()
+                res = await client.get(f"https://itunes.apple.com/search?term={term}&entity=song&limit=1", timeout=2.0)
+                if res.status_code == 200:
+                    data = res.json()
                     if data.get("resultCount", 0) > 0:
-                        image_url = data["results"][0].get("artworkUrl100", "").replace("100x100bb.jpg", "300x300bb.jpg")
+                        return data["results"][0].get("artworkUrl100", "").replace("100x100bb.jpg", "300x300bb.jpg")
             except Exception:
                 pass
-                    
+            return None
+
+        async with httpx.AsyncClient() as client:
+            tasks = []
+            for match in matches:
+                name = match.get("name")
+                artist = match.get("artist")
+                tasks.append(fetch_itunes_image(name, artist, client))
+            
+            images = await asyncio.gather(*tasks)
+
+        results = []
+        for i, match in enumerate(matches):
             results.append({
-                "name": name,
-                "artist": artist,
-                "image": image_url
+                "name": match.get("name"),
+                "artist": match.get("artist"),
+                "image": images[i]
             })
+            
         return {"results": results}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
