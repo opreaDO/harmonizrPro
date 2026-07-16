@@ -1,13 +1,13 @@
 fastapi
 uvicorn
 python-dotenv
-scikit-learn
+scikit-learn<1.5
 faiss-cpu
 httpx
 pandas
-numpy
+numpy<2
 implicit
-scipy
+scipy<1.13
 torch
 sqlalchemy
 psycopg2-binary
