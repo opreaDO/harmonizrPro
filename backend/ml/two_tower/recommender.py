@@ -60,10 +60,10 @@ class TwoTowerRecommender:
         user_indices = valid_interactions['user_id'].map(self.user_to_idx).values
         track_indices = valid_interactions['track_id'].map(self.track_to_idx).values
         
-        # 4. Initialize Model
+        # 4. Initialize Model (+1 for <UNK> token)
         self.model = TwoTowerModel(
             num_users=len(self.user_to_idx),
-            num_items=len(self.track_to_idx),
+            num_items=len(self.track_to_idx) + 1,
             content_dim=content_dim,
             embedding_dim=64
         )
@@ -73,7 +73,8 @@ class TwoTowerRecommender:
             user_indices=user_indices,
             item_indices=track_indices,
             item_content_matrix=content_matrix,
-            num_items=len(self.track_to_idx)
+            num_items=len(self.track_to_idx),
+            id_dropout_rate=0.15
         )
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
         
@@ -160,7 +161,8 @@ class TwoTowerRecommender:
         
         self.model.eval()
         with torch.no_grad():
-            dummy_idx_tensor = torch.tensor([0], dtype=torch.long).to(self.device)
+            unk_idx = len(self.track_to_idx) # The <UNK> token index
+            dummy_idx_tensor = torch.tensor([unk_idx], dtype=torch.long).to(self.device)
             content_tensor = torch.tensor(tag_vector, dtype=torch.float32).unsqueeze(0).to(self.device)
             item_vector = self.model.item_tower(dummy_idx_tensor, content_tensor).cpu().numpy()
             
@@ -190,7 +192,7 @@ class TwoTowerRecommender:
                 
             self.model = TwoTowerModel(
                 num_users=len(self.user_to_idx),
-                num_items=len(self.track_to_idx),
+                num_items=len(self.track_to_idx) + 1, # +1 for <UNK> token
                 content_dim=len(self.vectorizer.get_feature_names_out()),
                 embedding_dim=64
             )
