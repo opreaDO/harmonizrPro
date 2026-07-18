@@ -72,7 +72,7 @@ function App() {
           </h1>
         </div>
         
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
           <a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('dashboard'); }} 
              style={{ padding: '12px 16px', borderRadius: '8px', color: currentView === 'dashboard' ? 'var(--brand-primary)' : 'var(--text-secondary)', backgroundColor: currentView === 'dashboard' ? 'rgba(59, 130, 246, 0.1)' : 'transparent', textDecoration: 'none', fontSize: '15px', fontWeight: currentView === 'dashboard' ? '600' : '500', display: 'flex', alignItems: 'center', gap: '12px', transition: 'background 0.2s' }}>
              Home
@@ -82,6 +82,31 @@ function App() {
              Discovery
           </a>
         </nav>
+
+        {/* User Status / Logout Section */}
+        <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid var(--glass-border)' }}>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontFamily: 'Geist', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>
+            Connected Last.fm
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '120px' }}>
+              {lastFmUsername || 'None'}
+            </span>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('lastFmUsername');
+                setLastFmUsername('');
+                setCurrentView('dashboard');
+                setShowPopup(true);
+              }}
+              style={{ background: 'transparent', border: '1px solid var(--text-muted)', color: 'var(--text-secondary)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer', transition: 'all 0.2s', fontWeight: '600' }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FF4D4D'; e.currentTarget.style.color = '#FF4D4D'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--text-muted)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       </aside>
 
       {/* Main Content */}
