@@ -160,8 +160,8 @@ class LastFMClient:
         return {}
 
     @staticmethod
-    def get_user_top_artists(username: str, limit: int = 5):
-        params = {"method": "user.gettopartists", "user": username, "api_key": LASTFM_API_KEY, "format": "json", "limit": limit}
+    def get_user_top_artists(username: str, limit: int = 5, period: str = "overall"):
+        params = {"method": "user.gettopartists", "user": username, "api_key": LASTFM_API_KEY, "format": "json", "limit": limit, "period": period}
         res = requests.get(LastFMClient.BASE_URL, params=params)
         if res.status_code == 200:
             artists = res.json().get("topartists", {}).get("artist", [])
@@ -170,8 +170,8 @@ class LastFMClient:
         return []
 
     @staticmethod
-    def get_user_top_tracks(username: str, limit: int = 5):
-        params = {"method": "user.gettoptracks", "user": username, "api_key": LASTFM_API_KEY, "format": "json", "limit": limit}
+    def get_user_top_tracks(username: str, limit: int = 5, period: str = "overall"):
+        params = {"method": "user.gettoptracks", "user": username, "api_key": LASTFM_API_KEY, "format": "json", "limit": limit, "period": period}
         res = requests.get(LastFMClient.BASE_URL, params=params)
         if res.status_code == 200:
             tracks = res.json().get("toptracks", {}).get("track", [])

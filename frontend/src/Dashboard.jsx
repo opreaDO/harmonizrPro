@@ -3,14 +3,15 @@ import React, { useEffect, useState } from 'react';
 export default function Dashboard({ username }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [timeScale, setTimeScale] = useState('overall');
 
   useEffect(() => {
     if (!username) {
       setLoading(false);
       return;
     }
-    
-    fetch(`http://127.0.0.1:8000/api/v1/user_stats?username=${username}`)
+    setLoading(true);
+    fetch(`http://127.0.0.1:8000/api/v1/user_stats?username=${username}&period=${timeScale}`)
       .then(res => res.json())
       .then(data => {
         setStats(data);
@@ -20,7 +21,7 @@ export default function Dashboard({ username }) {
         console.error(err);
         setLoading(false);
       });
-  }, [username]);
+  }, [username, timeScale]);
 
   if (loading) {
     return <div className="text-on-surface-variant flex items-center justify-center h-[500px] text-xl">Loading your auditory landscape...</div>;
@@ -45,8 +46,16 @@ export default function Dashboard({ username }) {
         </div>
         {/* Time Filter */}
         <div className="flex bg-surface-container rounded-full p-1 border border-white/5 self-start md:self-end">
-          <button className="px-6 py-2 rounded-full font-label-caps text-outline hover:text-on-background transition-colors">30D</button>
-          <button className="px-6 py-2 rounded-full font-label-caps bg-surface-variant text-on-background shadow-md">ALL</button>
+          <button 
+            onClick={() => setTimeScale('1month')}
+            className={`px-6 py-2 rounded-full font-label-caps transition-colors ${timeScale === '1month' ? 'bg-[rgba(59,130,246,0.15)] text-primary border border-primary/30 shadow-[0_0_12px_rgba(59,130,246,0.2)]' : 'text-outline hover:text-on-background'}`}>
+            30D
+          </button>
+          <button 
+            onClick={() => setTimeScale('overall')}
+            className={`px-6 py-2 rounded-full font-label-caps transition-colors ${timeScale === 'overall' ? 'bg-[rgba(59,130,246,0.15)] text-primary border border-primary/30 shadow-[0_0_12px_rgba(59,130,246,0.2)]' : 'text-outline hover:text-on-background'}`}>
+            ALL
+          </button>
         </div>
       </header>
 
