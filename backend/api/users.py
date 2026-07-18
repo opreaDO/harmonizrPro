@@ -3,6 +3,18 @@ from backend.api.lastfm import LastFMClient
 
 router = APIRouter()
 
+@router.get("/validate_user")
+def validate_user(username: str = Query(..., description="Last.fm username")):
+    """Validates if a username exists on Last.fm"""
+    if not username:
+        raise HTTPException(status_code=400, detail="Username is required")
+        
+    info = LastFMClient.get_user_info(username)
+    if not info:
+        raise HTTPException(status_code=404, detail="User not found on Last.fm")
+        
+    return {"valid": True, "username": info.get("name")}
+
 @router.get("/user_stats")
 def get_user_stats(username: str = Query(..., description="Last.fm username")):
     """
