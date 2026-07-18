@@ -36,9 +36,8 @@ export default function ConnectPopup({ onSubmit, onSkip }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-0 opacity-40 blur-sm pointer-events-none" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDic12PEAGcGbfrz2lV4zinMqPaoLp4OXtAlXudbuP3bgYr_QMPJhUbVGul_i7RI4b_sHRRmUMz5LL6gQSuoGuTOzLMxBxqxFHAl9esbYrIQz6RKMt4Pwtp5Kxib6ZTNMzpfhi6AV5mUhrmcHSDVWNihm5EWTk9uHcVxzccb2O2JFv6Er8gSgucab-L06EPx6Z0YvvUC-Da9pMceYXj7MoKG0HCqgudhLkvFfNlT301Y9fuIMkBuqyb')", backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
-      <div className="fixed inset-0 z-40 bg-surface/80 backdrop-blur-md flex items-center justify-center p-4">
-        <div className="rounded-xl w-full max-w-md p-8 relative flex flex-col items-center text-center z-50" style={{ background: 'linear-gradient(145deg, rgba(23, 31, 51, 0.6) 0%, rgba(11, 19, 38, 0.4) 100%)', borderTop: '1px solid rgba(255, 255, 255, 0.1)', borderLeft: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)' }}>
+      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="rounded-xl w-full max-w-md p-8 relative flex flex-col items-center text-center z-50" style={{ background: 'linear-gradient(145deg, rgba(23, 31, 51, 0.9) 0%, rgba(11, 19, 38, 0.95) 100%)', borderTop: '1px solid rgba(59, 130, 246, 0.3)', borderLeft: '1px solid rgba(59, 130, 246, 0.1)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.6), 0 0 40px rgba(59, 130, 246, 0.15)' }}>
           <div className="space-y-2 mb-8 w-full">
             <h1 style={{ fontSize: '32px', fontWeight: '700', color: 'var(--brand-primary)', fontFamily: '"Hanken Grotesk"', letterSpacing: '-0.01em', margin: 0 }}>Analyze Your Sound</h1>
             <p style={{ fontSize: '16px', color: '#958ea0', fontFamily: 'Inter', margin: 0 }}>Enter your Last.fm username to unlock deep auditory insights.</p>
