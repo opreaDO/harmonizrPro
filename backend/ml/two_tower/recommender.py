@@ -51,6 +51,7 @@ class TwoTowerRecommender:
         # 2. Build TF-IDF for items
         print("Building TF-IDF content features...")
         corpus = [" ".join(track.get('tags', [])) for track in tracks_data]
+        self.vectorizer = TfidfVectorizer(max_features=5000, stop_words='english')
         content_matrix = self.vectorizer.fit_transform(corpus).astype(np.float32)
         content_dim = content_matrix.shape[1]
         
@@ -76,7 +77,13 @@ class TwoTowerRecommender:
             num_items=len(self.track_to_idx),
             id_dropout_rate=0.15
         )
-        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+        dataloader = DataLoader(
+            dataset, 
+            batch_size=batch_size, 
+            shuffle=True, 
+            num_workers=0, 
+            pin_memory=True
+        )
         
         # 6. Train
         trainer = TwoTowerTrainer(self.model, dataloader, device=self.device)

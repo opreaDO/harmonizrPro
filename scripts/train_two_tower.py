@@ -11,9 +11,9 @@ from backend.ml.two_tower.recommender import TwoTowerRecommender
 
 def main():
     parser = argparse.ArgumentParser(description="Train the Two-Tower Model on the full MSD dataset in the cloud")
-    parser.add_argument("--triplets", type=str, default="/content/drive/MyDrive/train_triplets.txt", help="Path to train_triplets.txt")
-    parser.add_argument("--tags", type=str, default="/content/drive/MyDrive/lastfm_tags.db", help="Path to lastfm_tags.db")
-    parser.add_argument("--metadata", type=str, default="/content/drive/MyDrive/track_metadata.db", help="Path to track_metadata.db")
+    parser.add_argument("--triplets", type=str, default="data/raw/msd/train_triplets.txt", help="Path to train_triplets.txt")
+    parser.add_argument("--tags", type=str, default="data/raw/msd/lastfm_tags.db", help="Path to lastfm_tags.db")
+    parser.add_argument("--metadata", type=str, default="data/raw/msd/track_metadata.db", help="Path to track_metadata.db")
     parser.add_argument("--output", type=str, default="./data/models/twotower", help="Path to save the trained model")
     parser.add_argument("--batch-size", type=int, default=8192, help="Batch size for InfoNCE (higher = more free negatives)")
     parser.add_argument("--epochs", type=int, default=5, help="Number of training epochs")
@@ -38,7 +38,7 @@ def main():
 
     print(f"Loading Interactions from {args.triplets}...")
     # The file has no headers: user_id, song_id, play_count
-    df = pd.read_csv(args.triplets, sep='\\t', header=None, names=['user_id', 'track_id', 'play_count'])
+    df = pd.read_csv(args.triplets, sep='\t', header=None, names=['user_id', 'track_id', 'play_count'])
     print(f"Original Rows: {len(df):,}")
 
     print("Applying Core-10 Filter (dropping users with < 10 listens)...")

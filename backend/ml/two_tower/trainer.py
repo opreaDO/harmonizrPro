@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from tqdm import tqdm
 
 class TwoTowerTrainer:
     def __init__(self, model, dataloader, learning_rate=1e-3, device="cpu"):
@@ -16,7 +17,10 @@ class TwoTowerTrainer:
         self.model.train()
         total_loss = 0.0
         
-        for batch_u, batch_i, batch_c in self.dataloader:
+        # Wrap dataloader in a progress bar
+        progress_bar = tqdm(self.dataloader, desc="Training Batches", leave=False)
+        
+        for batch_u, batch_i, batch_c in progress_bar:
             batch_u = batch_u.to(self.device)
             batch_i = batch_i.to(self.device)
             batch_c = batch_c.to(self.device)
