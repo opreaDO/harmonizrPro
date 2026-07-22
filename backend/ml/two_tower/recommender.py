@@ -50,7 +50,9 @@ class TwoTowerRecommender:
         
         # 2. Build FastText for items
         print("Training FastText model on tags...")
-        sentences = [track.get('tags', []) for track in tracks_data]
+        # CRITICAL FIX: Lowercase all tags! SQLite tags are mixed case ("Progressive rock"), 
+        # but the live Last.fm API returns lowercase ("progressive rock").
+        sentences = [[str(tag).lower() for tag in track.get('tags', [])] for track in tracks_data]
         # FastText learns sub-word features so it naturally handles messy/misspelled tags
         self.fasttext_model = FastText(sentences=sentences, vector_size=128, window=5, min_count=1, workers=4)
         self.fasttext_model.save(self.fasttext_path)
