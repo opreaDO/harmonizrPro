@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader
-from sklearn.feature_extraction.text import TfidfVectorizer
+from gensim.models import FastText
 import faiss
 
 from backend.ml.two_tower.model import TwoTowerModel
@@ -17,7 +17,7 @@ class TwoTowerRecommender:
         self.model_path = os.path.join(model_dir, "twotower.pth")
         self.user_mapping_path = os.path.join(model_dir, "user_mapping.pkl")
         self.track_mapping_path = os.path.join(model_dir, "track_mapping.pkl")
-        self.vectorizer_path = os.path.join(model_dir, "tfidf_vectorizer.pkl")
+        self.fasttext_path = os.path.join(model_dir, "fasttext.model")
         self.faiss_index_path = os.path.join(model_dir, "faiss_index.bin")
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))
@@ -27,7 +27,7 @@ class TwoTowerRecommender:
         self.track_to_idx = {}
         self.idx_to_track = {}
         
-        self.vectorizer = TfidfVectorizer(max_features=10000, stop_words='english')
+        self.fasttext_model = None
         
         self.model = None
         self.item_faiss_index = None
@@ -48,12 +48,22 @@ class TwoTowerRecommender:
         self.track_to_idx = {track: idx for idx, track in enumerate(unique_tracks)}
         self.idx_to_track = {idx: track for track, idx in self.track_to_idx.items()}
         
-        # 2. Build TF-IDF for items
-        print("Building TF-IDF content features...")
-        corpus = [" ".join(track.get('tags', [])) for track in tracks_data]
-        self.vectorizer = TfidfVectorizer(max_features=5000, stop_words='english')
-        content_matrix = self.vectorizer.fit_transform(corpus).astype(np.float32)
-        content_dim = content_matrix.shape[1]
+        # 2. Build FastText for items
+        print("Training FastText model on tags...")
+        sentences = [track.get('tags', []) for track in tracks_data]
+        # FastText learns sub-word features so it naturally handles messy/misspelled tags
+        self.fasttext_model = FastText(sentences=sentences, vector_size=128, window=5, min_count=1, workers=4)
+        self.fasttext_model.save(self.fasttext_path)
+        
+        print("Building Dense FastText content features...")
+        content_matrix = np.zeros((len(tracks_data), 128), dtype=np.float32)
+        for i, tags in enumerate(sentences):
+            if tags:
+                vectors = [self.fasttext_model.wv[tag] for tag in tags if tag in self.fasttext_model.wv]
+                if vectors:
+                    content_matrix[i] = np.mean(vectors, axis=0)
+        
+        content_dim = 128
         
         # 3. Filter interactions to known items
         valid_interactions = interactions_df[interactions_df['track_id'].isin(self.track_to_idx)].copy()
@@ -73,7 +83,6 @@ class TwoTowerRecommender:
         dataset = InteractionDataset(
             user_indices=user_indices,
             item_indices=track_indices,
-            item_content_matrix=content_matrix,
             num_items=len(self.track_to_idx),
             id_dropout_rate=0.15
         )
@@ -85,36 +94,42 @@ class TwoTowerRecommender:
             pin_memory=True
         )
         
-        # 6. Train
-        trainer = TwoTowerTrainer(self.model, dataloader, device=self.device)
+        # 6. Content matrix is already dense, just convert to PyTorch Tensor
+        print("Optimizing content matrix for GPU feeding (converting to dense)...")
+        dense_content_tensor = torch.tensor(content_matrix, dtype=torch.float32)
+        
+        # 7. Train
+        trainer = TwoTowerTrainer(self.model, dataloader, dense_content_tensor, device=self.device)
         trainer.train(epochs=epochs)
         
-        # 7. Precompute Item Embeddings and build FAISS index
-        self._build_faiss_index(content_matrix)
+        # 8. Precompute Item Embeddings and build FAISS index
+        self._build_faiss_index(dense_content_tensor)
         
         self.is_trained = True
         self.save_model()
         print("Two-Tower training complete.")
 
-    def _build_faiss_index(self, content_matrix):
+    def _build_faiss_index(self, content_tensor):
+        """Batch-computes all item embeddings and builds a FAISS index for fast retrieval."""
         print("Precomputing item embeddings for fast retrieval...")
         self.model.eval()
         self.model.to(self.device)
         
-        item_embeddings = []
+        num_items = len(self.track_to_idx)
+        all_embeddings = []
+        batch_size = 4096
+        
         with torch.no_grad():
-            for idx in range(len(self.track_to_idx)):
-                item_idx_tensor = torch.tensor([idx], dtype=torch.long).to(self.device)
+            for start in range(0, num_items, batch_size):
+                end = min(start + batch_size, num_items)
                 
-                content_features = content_matrix[idx]
-                if hasattr(content_features, "toarray"):
-                    content_features = content_features.toarray()[0]
-                content_tensor = torch.tensor(content_features, dtype=torch.float32).unsqueeze(0).to(self.device)
+                item_indices = torch.arange(start, end, dtype=torch.long).to(self.device)
+                content_batch = content_tensor[start:end].to(self.device)
                 
-                item_emb = self.model.item_tower(item_idx_tensor, content_tensor)
-                item_embeddings.append(item_emb.cpu().numpy()[0])
-                
-        item_embeddings = np.array(item_embeddings, dtype=np.float32)
+                item_embs = self.model.item_tower(item_indices, content_batch)
+                all_embeddings.append(item_embs.cpu().numpy())
+        
+        item_embeddings = np.concatenate(all_embeddings, axis=0).astype(np.float32)
         
         # We optimize for dot product via Inner Product search
         self.item_faiss_index = faiss.IndexFlatIP(64)
@@ -163,8 +178,11 @@ class TwoTowerRecommender:
         if not self.is_trained or self.item_faiss_index is None:
             raise ValueError("Model is not trained yet.")
             
-        text = " ".join(tags)
-        tag_vector = self.vectorizer.transform([text]).astype(np.float32).toarray()[0]
+        vectors = [self.fasttext_model.wv[tag] for tag in tags if tag in self.fasttext_model.wv]
+        if vectors:
+            tag_vector = np.mean(vectors, axis=0)
+        else:
+            tag_vector = np.zeros(128, dtype=np.float32)
         
         self.model.eval()
         with torch.no_grad():
@@ -183,8 +201,6 @@ class TwoTowerRecommender:
             pickle.dump((self.user_to_idx, self.idx_to_user), f)
         with open(self.track_mapping_path, 'wb') as f:
             pickle.dump((self.track_to_idx, self.idx_to_track), f)
-        with open(self.vectorizer_path, 'wb') as f:
-            pickle.dump(self.vectorizer, f)
         if self.item_faiss_index is not None:
             faiss.write_index(self.item_faiss_index, self.faiss_index_path)
 
@@ -194,16 +210,21 @@ class TwoTowerRecommender:
                 self.user_to_idx, self.idx_to_user = pickle.load(f)
             with open(self.track_mapping_path, 'rb') as f:
                 self.track_to_idx, self.idx_to_track = pickle.load(f)
-            with open(self.vectorizer_path, 'rb') as f:
-                self.vectorizer = pickle.load(f)
+            
+            if os.path.exists(self.fasttext_path):
+                self.fasttext_model = FastText.load(self.fasttext_path)
+                content_dim = self.fasttext_model.vector_size
+            else:
+                content_dim = 128
                 
             self.model = TwoTowerModel(
                 num_users=len(self.user_to_idx),
                 num_items=len(self.track_to_idx) + 1, # +1 for <UNK> token
-                content_dim=len(self.vectorizer.get_feature_names_out()),
+                content_dim=content_dim,
                 embedding_dim=64
             )
             self.model.load_state_dict(torch.load(self.model_path, map_location=self.device))
+            self.model.to(self.device)
             
             if os.path.exists(self.faiss_index_path):
                 self.item_faiss_index = faiss.read_index(self.faiss_index_path)

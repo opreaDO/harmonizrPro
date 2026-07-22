@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class UserTower(nn.Module):
     def __init__(self, num_users: int, embedding_dim: int = 64):
@@ -14,7 +15,7 @@ class UserTower(nn.Module):
         
     def forward(self, user_idx):
         emb = self.user_embedding(user_idx)
-        return self.net(emb)
+        return F.normalize(self.net(emb), dim=1)
 
 class ItemTower(nn.Module):
     def __init__(self, num_items: int, content_dim: int, embedding_dim: int = 64):
@@ -37,7 +38,7 @@ class ItemTower(nn.Module):
         id_emb = self.item_embedding(item_idx)
         content_emb = self.content_net(content_features)
         combined = torch.cat([id_emb, content_emb], dim=1)
-        return self.combine_net(combined)
+        return F.normalize(self.combine_net(combined), dim=1)
 
 class TwoTowerModel(nn.Module):
     def __init__(self, num_users: int, num_items: int, content_dim: int, embedding_dim: int = 64):

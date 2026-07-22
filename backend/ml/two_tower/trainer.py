@@ -4,10 +4,12 @@ import torch.optim as optim
 from tqdm import tqdm
 
 class TwoTowerTrainer:
-    def __init__(self, model, dataloader, learning_rate=1e-3, device="cpu"):
+    def __init__(self, model, dataloader, content_matrix, learning_rate=1e-3, device="cpu"):
         self.model = model.to(device)
         self.dataloader = dataloader
+        self.content_matrix = content_matrix
         self.device = device
+        self.temperature = 0.07  # Standard contrastive learning temperature (CLIP uses 0.07)
         
         # InfoNCE (In-Batch Softmax) Loss
         self.criterion = nn.CrossEntropyLoss()
@@ -20,19 +22,22 @@ class TwoTowerTrainer:
         # Wrap dataloader in a progress bar
         progress_bar = tqdm(self.dataloader, desc="Training Batches", leave=False)
         
-        for batch_u, batch_i, batch_c in progress_bar:
+        for batch_u, batch_i, batch_real_i in progress_bar:
             batch_u = batch_u.to(self.device)
             batch_i = batch_i.to(self.device)
-            batch_c = batch_c.to(self.device)
+            
+            # Ultra-fast PyTorch tensor slicing! Zero CPU overhead.
+            batch_c = self.content_matrix[batch_real_i].to(self.device)
             
             self.optimizer.zero_grad()
             
-            # Forward pass through individual towers
+            # Forward pass through individual towers (outputs are L2-normalized)
             user_vectors = self.model.user_tower(batch_u)
             item_vectors = self.model.item_tower(batch_i, batch_c)
             
-            # Compute pairwise dot products (InfoNCE logits) -> [BatchSize, BatchSize]
-            logits = torch.matmul(user_vectors, item_vectors.T)
+            # Compute scaled pairwise dot products (InfoNCE logits) -> [BatchSize, BatchSize]
+            # Temperature controls sharpness: lower = sharper distinctions
+            logits = torch.matmul(user_vectors, item_vectors.T) / self.temperature
             
             # The positive item for user i is at index i in the batch
             labels = torch.arange(logits.size(0)).to(self.device)

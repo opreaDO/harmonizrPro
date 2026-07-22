@@ -12,3 +12,4 @@ torch
 sqlalchemy
 psycopg2-binary
 requests
+gensim
