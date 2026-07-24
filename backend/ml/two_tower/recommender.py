@@ -89,7 +89,8 @@ class TwoTowerRecommender:
             id_dropout_rate=0.15
         )
         import platform
-        num_workers = 8 if platform.system() == "Linux" else 0
+
+        num_workers = 6 if platform.system() == "Linux" else 0
         
         dataloader = DataLoader(
             dataset, 
