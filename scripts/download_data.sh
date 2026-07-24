@@ -13,7 +13,7 @@ if [ -f "$DATA_DIR/train_triplets.txt" ]; then
     echo "[Skip] train_triplets.txt already exists."
 else
     echo "[1/3] Downloading train_triplets.txt.zip..."
-    wget -q --show-progress "http://millionsongdataset.com/sites/default/files/AdditionalFiles/train_triplets.txt.zip" -O "$DATA_DIR/train_triplets.txt.zip"
+    wget -q --show-progress "http://millionsongdataset.com/sites/default/files/challenge/train_triplets.txt.zip" -O "$DATA_DIR/train_triplets.txt.zip"
     echo "Unzipping triplets..."
     unzip -q "$DATA_DIR/train_triplets.txt.zip" -d "$DATA_DIR/"
     rm "$DATA_DIR/train_triplets.txt.zip"
