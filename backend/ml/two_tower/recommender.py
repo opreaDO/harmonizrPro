@@ -88,11 +88,14 @@ class TwoTowerRecommender:
             num_items=len(self.track_to_idx),
             id_dropout_rate=0.15
         )
+        import platform
+        num_workers = 8 if platform.system() == "Linux" else 0
+        
         dataloader = DataLoader(
             dataset, 
             batch_size=batch_size, 
             shuffle=True, 
-            num_workers=0, 
+            num_workers=num_workers, 
             pin_memory=True
         )
         

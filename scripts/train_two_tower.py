@@ -16,7 +16,7 @@ def main():
     parser.add_argument("--metadata", type=str, default="data/raw/msd/track_metadata.db", help="Path to track_metadata.db")
     parser.add_argument("--output", type=str, default="./data/models/twotower", help="Path to save the trained model")
     parser.add_argument("--batch-size", type=int, default=2048, help="Batch size for InfoNCE (higher = more free negatives)")
-    parser.add_argument("--max-users", type=int, default=50000, help="Smart sampling: Keep only the top N most active users")
+    parser.add_argument("--max-users", type=int, default=0, help="Smart sampling: Keep only the top N most active users (0 = use all)")
     parser.add_argument("--epochs", type=int, default=5, help="Number of training epochs")
     parser.add_argument("--force", action="store_true", help="Delete existing model files and train from scratch")
     
