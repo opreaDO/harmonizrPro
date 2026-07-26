@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Define the target directory
-DATA_DIR="data/raw/msd"
+# Define the target directory via command line argument, fallback to default
+DATA_DIR=${1:-"data/raw/msd"}
 mkdir -p "$DATA_DIR"
 
 echo "========================================"

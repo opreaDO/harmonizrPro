@@ -20,8 +20,17 @@ source /vol/cuda/12.0.0/setup.sh
 
 echo "Starting Harmonizr Two-Tower Training..."
 
-# 3. Run the training script on the FULL dataset (0) for 30 epochs!
-# If you don't have 'uv' installed on the cluster, just use standard 'python'
-python scripts/train_two_tower.py --max-users 0 --epochs 30 --force
+# 3. Define the external storage paths
+BITBUCKET_DATA="/vol/bitbucket/${USER}/harmonizr_data"
+
+# 4. Run the training script on the FULL dataset (0) for 30 epochs!
+python scripts/train_two_tower.py \
+    --triplets "$BITBUCKET_DATA/raw/msd/train_triplets.txt" \
+    --tags "$BITBUCKET_DATA/raw/msd/lastfm_tags.db" \
+    --metadata "$BITBUCKET_DATA/raw/msd/track_metadata.db" \
+    --output "$BITBUCKET_DATA/models/twotower" \
+    --max-users 0 \
+    --epochs 30 \
+    --force
 
 echo "Training complete!"
