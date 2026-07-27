@@ -92,6 +92,35 @@ export default function Dashboard({ username }) {
         </div>
       </div>
 
+      {/* Advanced Analytics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Chronotype Card */}
+        <div className="rounded-xl p-6 relative overflow-hidden group" style={{ background: 'linear-gradient(145deg, rgba(23, 31, 51, 0.6) 0%, rgba(11, 19, 38, 0.4) 100%)', borderTop: '1px solid rgba(255, 255, 255, 0.1)', borderLeft: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)' }}>
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all duration-500"></div>
+          <div className="flex justify-between items-start mb-4">
+            <span className="font-label-caps text-outline uppercase tracking-widest text-[12px]">Audio Rhythm</span>
+            <span className="material-symbols-outlined text-purple-400">schedule</span>
+          </div>
+          <div style={{ fontSize: '32px', color: '#dae2fd', fontFamily: 'Geist', fontWeight: '500', letterSpacing: '0.05em', marginBottom: '8px' }}>{stats?.chronotype || 'Unknown'}</div>
+          <div className="font-body-sm text-on-surface-variant">Dominant listening time (Last 100 tracks)</div>
+        </div>
+
+        {/* Binge Factor Card */}
+        <div className="rounded-xl p-6 relative overflow-hidden group" style={{ background: 'linear-gradient(145deg, rgba(23, 31, 51, 0.6) 0%, rgba(11, 19, 38, 0.4) 100%)', borderTop: '1px solid rgba(255, 255, 255, 0.1)', borderLeft: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)' }}>
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all duration-500"></div>
+          <div className="flex justify-between items-start mb-4">
+            <span className="font-label-caps text-outline uppercase tracking-widest text-[12px]">Biggest Binge</span>
+            <span className="material-symbols-outlined text-rose-400">local_fire_department</span>
+          </div>
+          <div style={{ fontSize: '32px', color: '#dae2fd', fontFamily: 'Geist', fontWeight: '500', letterSpacing: '0.05em', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {stats?.binge?.artist || 'None'}
+          </div>
+          <div className="font-body-sm text-on-surface-variant">
+            Streak of {stats?.binge?.streak || 0} consecutive tracks
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Top Artists Card */}
         <div className="lg:col-span-8 rounded-xl p-6 flex flex-col min-h-[400px]" style={{ background: 'linear-gradient(145deg, rgba(23, 31, 51, 0.6) 0%, rgba(11, 19, 38, 0.4) 100%)', borderTop: '1px solid rgba(255, 255, 255, 0.1)', borderLeft: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)' }}>

@@ -36,11 +36,47 @@ def get_user_stats(
 
     top_artists = LastFMClient.get_user_top_artists(username, limit=5, period=period)
     top_tracks = LastFMClient.get_user_top_tracks(username, limit=5, period=period)
-    recent_tracks = LastFMClient.get_user_recent_tracks(username, limit=5)
+    recent_tracks_for_stats = LastFMClient.get_user_recent_tracks(username, limit=100)
+    
+    # 1. Calculate Chronotype (Audio Rhythm)
+    buckets = {"Morning (6am-12pm)": 0, "Afternoon (12pm-6pm)": 0, "Evening (6pm-12am)": 0, "Late Night (12am-6am)": 0}
+    from datetime import datetime
+    for t in recent_tracks_for_stats:
+        if "date" in t and "uts" in t["date"]:
+            hour = datetime.fromtimestamp(int(t["date"]["uts"])).hour
+            if 6 <= hour < 12: buckets["Morning (6am-12pm)"] += 1
+            elif 12 <= hour < 18: buckets["Afternoon (12pm-6pm)"] += 1
+            elif 18 <= hour <= 23: buckets["Evening (6pm-12am)"] += 1
+            else: buckets["Late Night (12am-6am)"] += 1
+            
+    chronotype = max(buckets, key=buckets.get) if any(buckets.values()) else "Unknown"
+
+    # 2. Calculate Binge Factor (Artist Fixation)
+    max_streak = 0
+    current_streak = 1
+    binge_artist = "None"
+    
+    if recent_tracks_for_stats:
+        prev_artist = recent_tracks_for_stats[0].get("artist", {}).get("#text", "")
+        for t in recent_tracks_for_stats[1:]:
+            curr_artist = t.get("artist", {}).get("#text", "")
+            if curr_artist == prev_artist:
+                current_streak += 1
+            else:
+                if current_streak > max_streak:
+                    max_streak = current_streak
+                    binge_artist = prev_artist
+                current_streak = 1
+                prev_artist = curr_artist
+        if current_streak > max_streak:
+            max_streak = current_streak
+            binge_artist = prev_artist
 
     return {
         "info": info,
         "top_artists": top_artists,
         "top_tracks": top_tracks,
-        "recent_tracks": recent_tracks
+        "recent_tracks": recent_tracks_for_stats[:5],
+        "chronotype": chronotype,
+        "binge": {"artist": binge_artist, "streak": max_streak}
     }
