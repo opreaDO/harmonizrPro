@@ -111,10 +111,14 @@ function App() {
 
       {/* Main Content */}
       <main style={{ flex: 1, padding: '40px 60px', position: 'relative', overflowY: 'auto' }}>
-        {currentView === 'dashboard' ? (
+        
+        {/* Dashboard View - Hidden via CSS when not active to preserve state/cache */}
+        <div style={{ display: currentView === 'dashboard' ? 'block' : 'none' }} className={currentView === 'dashboard' ? 'animate-slide-up' : ''}>
           <Dashboard username={lastFmUsername} />
-        ) : (
-          <div className="animate-slide-up">
+        </div>
+
+        {/* Discovery View - Hidden via CSS when not active to preserve search state */}
+        <div style={{ display: currentView === 'recommendations' ? 'block' : 'none' }} className={currentView === 'recommendations' ? 'animate-slide-up' : ''}>
             {/* Top Header Text */}
             <div style={{ marginBottom: '40px', maxWidth: '1000px' }}>
               <h2 className="text-gradient" style={{ fontSize: '56px', fontWeight: '800', letterSpacing: '-0.03em', margin: 0, lineHeight: '1.1' }}>Sonic Discovery</h2>
@@ -343,7 +347,6 @@ function App() {
               </div>
             )}
           </div>
-        )}
       </main>
 
       {showPopup && (
