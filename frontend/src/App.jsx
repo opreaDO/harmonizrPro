@@ -63,7 +63,7 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-base)' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--bg-base)' }}>
       {/* Sidebar Navigation */}
       <aside style={{ width: '260px', backgroundColor: 'var(--glass-bg)', borderRight: '1px solid var(--glass-border)', padding: '32px 24px', display: 'flex', flexDirection: 'column', zIndex: 10, backdropFilter: 'blur(20px)' }}>
         <div style={{ marginBottom: '48px' }}>
