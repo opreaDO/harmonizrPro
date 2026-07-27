@@ -57,14 +57,18 @@ import asyncio
 import httpx
 import urllib.parse
 
-async def fetch_itunes_image(name: str, artist: str, client: httpx.AsyncClient):
+async def fetch_itunes_data(name: str, artist: str, client: httpx.AsyncClient):
     try:
         term = urllib.parse.quote(f"{name} {artist}")
         res = await client.get(f"https://itunes.apple.com/search?term={term}&entity=song&limit=1", timeout=2.0)
         if res.status_code == 200:
             data = res.json()
             if data.get("resultCount", 0) > 0:
-                return data["results"][0].get("artworkUrl100", "").replace("100x100bb.jpg", "300x300bb.jpg")
+                result = data["results"][0]
+                return {
+                    "image": result.get("artworkUrl100", "").replace("100x100bb.jpg", "300x300bb.jpg"),
+                    "preview": result.get("previewUrl")
+                }
     except Exception:
         pass
     return None
@@ -76,14 +80,16 @@ async def attach_itunes_images(recommendations: List[Dict[str, Any]]) -> List[Di
             name_str = rec.get("name", "")
             if " - " in name_str:
                 parts = name_str.split(" - ", 1)
-                tasks.append(fetch_itunes_image(parts[1], parts[0], client))
+                tasks.append(fetch_itunes_data(parts[1], parts[0], client))
             else:
-                tasks.append(fetch_itunes_image(name_str, "", client))
+                tasks.append(fetch_itunes_data(name_str, "", client))
                 
-        images = await asyncio.gather(*tasks)
+        itunes_data = await asyncio.gather(*tasks)
         
     for i, rec in enumerate(recommendations):
-        rec["image"] = images[i]
+        if itunes_data[i]:
+            rec["image"] = itunes_data[i].get("image")
+            rec["preview"] = itunes_data[i].get("preview")
         
     return recommendations
 
@@ -172,16 +178,18 @@ async def search_track(query: str):
             for match in matches:
                 name = match.get("name")
                 artist = match.get("artist")
-                tasks.append(fetch_itunes_image(name, artist, client))
+                tasks.append(fetch_itunes_data(name, artist, client))
             
-            images = await asyncio.gather(*tasks)
+            itunes_data = await asyncio.gather(*tasks)
 
         results = []
         for i, match in enumerate(matches):
+            data = itunes_data[i] or {}
             results.append({
                 "name": match.get("name"),
                 "artist": match.get("artist"),
-                "image": images[i],
+                "image": data.get("image"),
+                "preview": data.get("preview"),
                 "mbid": match.get("mbid")
             })
             

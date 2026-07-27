@@ -10,6 +10,7 @@ function App() {
   const [searchResults, setSearchResults] = useState(null); // Last.fm search matches
   const [recommendations, setRecommendations] = useState(null); // ML Output
   const [seedTrack, setSeedTrack] = useState(null);
+  const [playingPreview, setPlayingPreview] = useState(null);
   
   const [loading, setLoading] = useState(false);
   const [currentQuery, setCurrentQuery] = useState(null);
@@ -281,12 +282,32 @@ function App() {
                     <div key={i} className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', animationDelay: `${i * 0.05}s` }}
                          onClick={() => selectSongAndRecommend(track)}
                     >
-                      <div style={{ width: '64px', height: '64px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                      <div style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}
+                           onClick={(e) => {
+                               if (track.preview) {
+                                   e.stopPropagation();
+                                   if (playingPreview === track.preview) setPlayingPreview(null);
+                                   else setPlayingPreview(track.preview);
+                               }
+                           }}
+                      >
                         {track.image ? (
                           <img src={track.image} alt="Album Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                          </div>
+                        )}
+                        {track.preview && (
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', cursor: 'pointer' }}
+                               onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.7)'}
+                               onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+                          >
+                             {playingPreview === track.preview ? (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                             ) : (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                             )}
                           </div>
                         )}
                       </div>
@@ -341,12 +362,32 @@ function App() {
                            }
                          }}
                     >
-                      <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                      <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}
+                           onClick={(e) => {
+                               if (track.preview) {
+                                   e.stopPropagation();
+                                   if (playingPreview === track.preview) setPlayingPreview(null);
+                                   else setPlayingPreview(track.preview);
+                               }
+                           }}
+                      >
                         {track.image ? (
                           <img src={track.image} alt="Album Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                           <div style={{ width: '100%', height: '100%', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <span className="data-text" style={{ fontSize: '18px', color: 'var(--brand-primary)', fontWeight: '600' }}>{i + 1}</span>
+                          </div>
+                        )}
+                        {track.preview && (
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', cursor: 'pointer' }}
+                               onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.7)'}
+                               onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+                          >
+                             {playingPreview === track.preview ? (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                             ) : (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                             )}
                           </div>
                         )}
                       </div>
@@ -391,6 +432,8 @@ function App() {
           onSkip={() => setShowPopup(false)}
         />
       )}
+      
+      {playingPreview && <audio src={playingPreview} autoPlay onEnded={() => setPlayingPreview(null)} />}
 
       <style>{`
         @keyframes pulse {
