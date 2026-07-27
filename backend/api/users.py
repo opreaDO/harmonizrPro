@@ -15,8 +15,28 @@ def validate_user(username: str = Query(..., description="Last.fm username")):
         
     return {"valid": True, "username": info.get("name")}
 
+import asyncio
+import httpx
+from backend.api.recommendations import fetch_itunes_data
+
+async def attach_itunes_to_lastfm(tracks: list) -> list:
+    async with httpx.AsyncClient() as client:
+        tasks = []
+        for t in tracks:
+            artist = t.get("artist", {}).get("#text", "")
+            if not artist and isinstance(t.get("artist"), str):
+                artist = t.get("artist")
+            tasks.append(fetch_itunes_data(t.get("name", ""), artist, client))
+        itunes_data = await asyncio.gather(*tasks)
+        
+    for i, t in enumerate(tracks):
+        if itunes_data[i]:
+            t["itunes_image"] = itunes_data[i].get("image")
+            t["preview"] = itunes_data[i].get("preview")
+    return tracks
+
 @router.get("/user_stats")
-def get_user_stats(
+async def get_user_stats(
     username: str = Query(..., description="Last.fm username"),
     period: str = Query("overall", description="overall, 7day, 1month, 3month, 6month, 12month")
 ):
@@ -72,11 +92,13 @@ def get_user_stats(
             max_streak = current_streak
             binge_artist = prev_artist
 
+    recent_tracks_enriched = await attach_itunes_to_lastfm(recent_tracks_for_stats[:5])
+
     return {
         "info": info,
         "top_artists": top_artists,
         "top_tracks": top_tracks,
-        "recent_tracks": recent_tracks_for_stats[:5],
+        "recent_tracks": recent_tracks_enriched,
         "chronotype": chronotype,
         "binge": {"artist": binge_artist, "streak": max_streak}
     }
