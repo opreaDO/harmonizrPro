@@ -53,9 +53,43 @@ def translate_ids_to_tracks(db: Session, track_results: List[tuple[str, float]])
             results.append({"track_id": sid, "name": f"Unknown Track ({sid})", "score": pct})
     return results
 
+import asyncio
+import httpx
+import urllib.parse
+
+async def fetch_itunes_image(name: str, artist: str, client: httpx.AsyncClient):
+    try:
+        term = urllib.parse.quote(f"{name} {artist}")
+        res = await client.get(f"https://itunes.apple.com/search?term={term}&entity=song&limit=1", timeout=2.0)
+        if res.status_code == 200:
+            data = res.json()
+            if data.get("resultCount", 0) > 0:
+                return data["results"][0].get("artworkUrl100", "").replace("100x100bb.jpg", "300x300bb.jpg")
+    except Exception:
+        pass
+    return None
+
+async def attach_itunes_images(recommendations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async with httpx.AsyncClient() as client:
+        tasks = []
+        for rec in recommendations:
+            name_str = rec.get("name", "")
+            if " - " in name_str:
+                parts = name_str.split(" - ", 1)
+                tasks.append(fetch_itunes_image(parts[1], parts[0], client))
+            else:
+                tasks.append(fetch_itunes_image(name_str, "", client))
+                
+        images = await asyncio.gather(*tasks)
+        
+    for i, rec in enumerate(recommendations):
+        rec["image"] = images[i]
+        
+    return recommendations
+
 
 @router.get("/recommend/{user_id}", response_model=RecommendationResponse)
-def get_recommendations(user_id: str, top_k: int = 10, db: Session = Depends(get_db)):
+async def get_recommendations(user_id: str, top_k: int = 10, db: Session = Depends(get_db)):
     if not recommender or not recommender.is_trained:
         raise HTTPException(status_code=503, detail="Recommendation engine is not ready.")
     
@@ -65,13 +99,14 @@ def get_recommendations(user_id: str, top_k: int = 10, db: Session = Depends(get
             return {"user_id": user_id, "recommendations": []}
             
         translated = translate_ids_to_tracks(db, recs)
-        return {"user_id": user_id, "recommendations": translated}
+        translated_with_images = await attach_itunes_images(translated)
+        return {"user_id": user_id, "recommendations": translated_with_images}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/bridge_recommend", response_model=RecommendationResponse)
-def get_bridge_recommendations(artist: str, track: str, use_fallback: bool = True, use_super_tags: bool = False, top_k: int = 10, db: Session = Depends(get_db)):
+async def get_bridge_recommendations(artist: str, track: str, use_fallback: bool = True, use_super_tags: bool = False, top_k: int = 10, db: Session = Depends(get_db)):
     """
     Cold-start protocol using Two-Tower model:
     1. Fetches tags from live Last.fm API
@@ -102,15 +137,17 @@ def get_bridge_recommendations(artist: str, track: str, use_fallback: bool = Tru
             if track_row.song_id in recommender.track_to_idx:
                 recs = recommender.get_similar_tracks(track_row.song_id, top_k=top_k)
                 translated = translate_ids_to_tracks(db, recs)
-                return {"search_query": f"{artist} - {track} (Fast-Path)", "recommendations": translated}
+                translated_with_images = await attach_itunes_images(translated)
+                return {"search_query": f"{artist} - {track} (Fast-Path)", "recommendations": translated_with_images}
             
         # 2. Text to math (TF-IDF & Tower) and NN Search
         recs = recommender.recommend_for_cold_track(tags, top_k=top_k)
         
         # 3. Translate IDs
         translated = translate_ids_to_tracks(db, recs)
+        translated_with_images = await attach_itunes_images(translated)
         
-        return {"search_query": f"{artist} - {track}", "recommendations": translated}
+        return {"search_query": f"{artist} - {track}", "recommendations": translated_with_images}
     except HTTPException:
         raise
     except Exception as e:
@@ -129,18 +166,6 @@ async def search_track(query: str):
         import urllib.parse
         
         matches = LastFMClient.search_track(query)
-        
-        async def fetch_itunes_image(name, artist, client):
-            try:
-                term = urllib.parse.quote(f"{name} {artist}")
-                res = await client.get(f"https://itunes.apple.com/search?term={term}&entity=song&limit=1", timeout=2.0)
-                if res.status_code == 200:
-                    data = res.json()
-                    if data.get("resultCount", 0) > 0:
-                        return data["results"][0].get("artworkUrl100", "").replace("100x100bb.jpg", "300x300bb.jpg")
-            except Exception:
-                pass
-            return None
 
         async with httpx.AsyncClient() as client:
             tasks = []

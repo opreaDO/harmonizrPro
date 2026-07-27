@@ -314,9 +314,13 @@ function App() {
                          }}
                     >
                       <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                        <div style={{ width: '100%', height: '100%', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span className="data-text" style={{ fontSize: '18px', color: 'var(--brand-primary)', fontWeight: '600' }}>{i + 1}</span>
-                        </div>
+                        {track.image ? (
+                          <img src={track.image} alt="Album Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span className="data-text" style={{ fontSize: '18px', color: 'var(--brand-primary)', fontWeight: '600' }}>{i + 1}</span>
+                          </div>
+                        )}
                       </div>
                       
                       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
