@@ -141,7 +141,7 @@ class TwoTowerRecommender:
         self.item_faiss_index = faiss.IndexFlatIP(64)
         self.item_faiss_index.add(item_embeddings)
 
-    def recommend(self, user_id: str, top_k: int = 10) -> list[str]:
+    def recommend(self, user_id: str, top_k: int = 10) -> list[tuple[str, float]]:
         if not self.is_trained or self.item_faiss_index is None:
             raise ValueError("Model is not trained yet.")
             
@@ -158,10 +158,13 @@ class TwoTowerRecommender:
             
         distances, indices = self.item_faiss_index.search(user_vector, top_k)
         
-        recommendations = [self.idx_to_track[idx] for idx in indices[0] if idx != -1]
-        return recommendations
+        results = []
+        for d, idx in zip(distances[0], indices[0]):
+            if idx != -1:
+                results.append((self.idx_to_track[idx], float(d)))
+        return results
 
-    def get_similar_tracks(self, track_id: str, top_k: int = 10) -> list[str]:
+    def get_similar_tracks(self, track_id: str, top_k: int = 10) -> list[tuple[str, float]]:
         if not self.is_trained or self.item_faiss_index is None:
             raise ValueError("Model is not trained yet.")
             
@@ -177,10 +180,13 @@ class TwoTowerRecommender:
         # Search for similar items in the item FAISS index
         distances, indices = self.item_faiss_index.search(track_vector, top_k + 1)
         
-        recommendations = [self.idx_to_track[idx] for idx in indices[0] if idx not in [-1, track_idx]][:top_k]
-        return recommendations
+        results = []
+        for d, idx in zip(distances[0], indices[0]):
+            if idx not in [-1, track_idx]:
+                results.append((self.idx_to_track[idx], float(d)))
+        return results[:top_k]
 
-    def recommend_for_cold_track(self, tags: list[str], top_k: int = 10) -> list[str]:
+    def recommend_for_cold_track(self, tags: list[str], top_k: int = 10) -> list[tuple[str, float]]:
         if not self.is_trained or self.item_faiss_index is None:
             raise ValueError("Model is not trained yet.")
             
@@ -198,8 +204,11 @@ class TwoTowerRecommender:
             item_vector = self.model.item_tower(dummy_idx_tensor, content_tensor).cpu().numpy()
             
         distances, indices = self.item_faiss_index.search(item_vector, top_k)
-        recommendations = [self.idx_to_track[idx] for idx in indices[0] if idx != -1]
-        return recommendations
+        results = []
+        for d, idx in zip(distances[0], indices[0]):
+            if idx != -1:
+                results.append((self.idx_to_track[idx], float(d)))
+        return results
 
     def save_model(self):
         torch.save(self.model.state_dict(), self.model_path)

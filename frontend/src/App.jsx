@@ -291,7 +291,7 @@ function App() {
                     const split = trackName.split(' - ');
                     const artist = split[0];
                     const title = split.slice(1).join(' - ') || trackName;
-                    const scoreMatch = Math.max(10, Math.floor(98 - (i * 2.5))); // Mock match percentage descending
+                    const scoreMatch = track.score || 50; // Real percentage from the backend
                     
                     return (
                     <div key={i} className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', animationDelay: `${i * 0.05}s` }}

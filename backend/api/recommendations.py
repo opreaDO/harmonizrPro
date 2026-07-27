@@ -26,11 +26,15 @@ class RecommendationResponse(BaseModel):
     search_query: Optional[str] = None
     recommendations: List[Dict[str, Any]]
 
-def translate_ids_to_tracks(db: Session, track_ids: List[str]) -> List[Dict[str, str]]:
+def translate_ids_to_tracks(db: Session, track_results: List[tuple[str, float]]) -> List[Dict[str, Any]]:
     """Translates raw SO... IDs into human readable track dictionaries using Postgres."""
+    import math
+    def sigmoid_pct(x):
+        return max(1, min(99, round(100 / (1 + math.exp(-x)))))
+
+    track_ids = [t[0] for t in track_results]
     if not db:
-        # Fallback if DB is not connected
-        return [{"track_id": tid, "name": f"Unknown Track ({tid})"} for tid in track_ids]
+        return [{"track_id": sid, "name": f"Unknown Track ({sid})", "score": sigmoid_pct(score)} for sid, score in track_results]
         
     # ML model uses song_id (SO...), but the DB PK is track_id (TR...)
     tracks = db.query(Track).filter(Track.song_id.in_(track_ids)).all()
@@ -38,11 +42,14 @@ def translate_ids_to_tracks(db: Session, track_ids: List[str]) -> List[Dict[str,
     track_map = {t.song_id: {"track_id": t.track_id, "name": f"{t.artist_name} - {t.title}"} for t in tracks}
     
     results = []
-    for sid in track_ids:
+    for sid, score in track_results:
+        pct = sigmoid_pct(score)
         if sid in track_map:
-            results.append(track_map[sid])
+            res = track_map[sid].copy()
+            res["score"] = pct
+            results.append(res)
         else:
-            results.append({"track_id": sid, "name": f"Unknown Track ({sid})"})
+            results.append({"track_id": sid, "name": f"Unknown Track ({sid})", "score": pct})
     return results
 
 
