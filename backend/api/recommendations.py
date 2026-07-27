@@ -30,7 +30,8 @@ def translate_ids_to_tracks(db: Session, track_results: List[tuple[str, float]])
     """Translates raw SO... IDs into human readable track dictionaries using Postgres."""
     import math
     def sigmoid_pct(x):
-        return max(1, min(99, round(100 / (1 + math.exp(-x)))))
+        # Apply temperature scaling (x * 3.5) to sharpen the raw FAISS logits
+        return max(1, min(99, round(100 / (1 + math.exp(- (x * 3.5))))))
 
     track_ids = [t[0] for t in track_results]
     if not db:
