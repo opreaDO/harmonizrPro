@@ -11,6 +11,24 @@ function App() {
   const [recommendations, setRecommendations] = useState(null); // ML Output
   const [seedTrack, setSeedTrack] = useState(null);
   const [playingPreview, setPlayingPreview] = useState(null);
+  const [crate, setCrate] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('harmonizr_crate')) || []; }
+    catch { return []; }
+  });
+  
+  useEffect(() => {
+    localStorage.setItem('harmonizr_crate', JSON.stringify(crate));
+  }, [crate]);
+
+  const toggleCrate = (trackObj, e) => {
+    e.stopPropagation();
+    const isSaved = crate.some(t => t.name === trackObj.name && t.artist === trackObj.artist);
+    if (isSaved) {
+      setCrate(crate.filter(t => !(t.name === trackObj.name && t.artist === trackObj.artist)));
+    } else {
+      setCrate([...crate, trackObj]);
+    }
+  };
   
   const [loading, setLoading] = useState(false);
   const [currentQuery, setCurrentQuery] = useState(null);
@@ -84,8 +102,15 @@ function App() {
              Home
           </a>
           <a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('recommendations'); }} 
-             style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: currentView === 'recommendations' ? 'rgba(59, 130, 246, 0.1)' : 'transparent', color: currentView === 'recommendations' ? 'var(--brand-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontSize: '15px', fontWeight: currentView === 'recommendations' ? '600' : '500', display: 'flex', alignItems: 'center', gap: '12px' }}>
+             style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: currentView === 'recommendations' ? 'rgba(59, 130, 246, 0.1)' : 'transparent', color: currentView === 'recommendations' ? 'var(--brand-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontSize: '15px', fontWeight: currentView === 'recommendations' ? '600' : '500', display: 'flex', alignItems: 'center', gap: '12px', transition: 'background 0.2s' }}>
              Discovery
+          </a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('crate'); }} 
+             style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: currentView === 'crate' ? 'rgba(59, 130, 246, 0.1)' : 'transparent', color: currentView === 'crate' ? 'var(--brand-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontSize: '15px', fontWeight: currentView === 'crate' ? '600' : '500', display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'background 0.2s' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+               My Crate
+             </div>
+             <span style={{ background: currentView === 'crate' ? 'var(--brand-primary)' : 'rgba(255,255,255,0.1)', color: '#fff', fontSize: '11px', padding: '2px 8px', borderRadius: '12px', fontWeight: '800' }}>{crate.length}</span>
           </a>
         </nav>
 
@@ -121,6 +146,78 @@ function App() {
         {/* Dashboard View - Hidden via CSS when not active to preserve state/cache */}
         <div style={{ display: currentView === 'dashboard' ? 'block' : 'none' }} className={currentView === 'dashboard' ? 'animate-slide-up' : ''}>
           <Dashboard username={lastFmUsername} />
+        </div>
+
+        {/* Crate View */}
+        <div style={{ display: currentView === 'crate' ? 'block' : 'none' }} className={currentView === 'crate' ? 'animate-slide-up' : ''}>
+            <div style={{ marginBottom: '40px', maxWidth: '1000px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+              <div>
+                <h2 className="text-gradient" style={{ fontSize: '56px', fontWeight: '800', letterSpacing: '-0.03em', margin: 0, lineHeight: '1.1' }}>My Crate</h2>
+                <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginTop: '8px' }}>Your staging queue for Spotify exports.</p>
+              </div>
+              <button style={{ padding: '12px 24px', background: 'var(--brand-primary)', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: '700', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: crate.length === 0 ? 0.5 : 1, pointerEvents: crate.length === 0 ? 'none' : 'auto' }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export to Spotify
+              </button>
+            </div>
+            
+            {crate.length === 0 ? (
+               <div style={{ height: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.5, border: '1px dashed var(--glass-border)', borderRadius: '24px' }}>
+                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ marginBottom: '16px' }}><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                 <p style={{ fontSize: '18px', fontWeight: '500', color: 'var(--text-secondary)' }}>Your crate is empty.</p>
+               </div>
+            ) : (
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '1000px' }}>
+                 {crate.map((track, i) => (
+                   <div key={i} className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '20px', animationDelay: `${i * 0.05}s` }}>
+                     <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}
+                          onClick={(e) => {
+                              if (track.preview) {
+                                  e.stopPropagation();
+                                  if (playingPreview === track.preview) setPlayingPreview(null);
+                                  else setPlayingPreview(track.preview);
+                              }
+                          }}
+                     >
+                       {track.image ? (
+                         <img src={track.image} alt="Album Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                       ) : (
+                         <div style={{ width: '100%', height: '100%', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <span className="data-text" style={{ fontSize: '18px', color: 'var(--brand-primary)', fontWeight: '600' }}>{i + 1}</span>
+                         </div>
+                       )}
+                       {track.preview && (
+                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', cursor: 'pointer' }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.7)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+                         >
+                            {playingPreview === track.preview ? (
+                               <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                            ) : (
+                               <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            )}
+                         </div>
+                       )}
+                     </div>
+                     
+                     <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                       <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0 }}>{track.name}</h4>
+                       <p style={{ fontSize: '15px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0 }}>{track.artist}</p>
+                     </div>
+                     
+                     <button onClick={() => setCrate(crate.filter(t => !(t.name === track.name && t.artist === track.artist)))} style={{ background: 'transparent', border: '1px solid rgba(255, 77, 77, 0.3)', color: '#FF4D4D', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0 }}
+                             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 77, 77, 0.1)'; e.currentTarget.style.borderColor = 'rgba(255, 77, 77, 0.6)'; }}
+                             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255, 77, 77, 0.3)'; }}
+                     >
+                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                     </button>
+                   </div>
+                 ))}
+               </div>
+            )}
         </div>
 
         {/* Discovery View - Hidden via CSS when not active to preserve search state */}
@@ -407,9 +504,18 @@ function App() {
                         <span style={{ fontSize: '11px', color: 'var(--brand-primary)', fontFamily: 'Geist', fontWeight: '600', letterSpacing: '0.05em' }}>{scoreMatch}% MATCH</span>
                       </div>
                       
-                      <div className="check-circle" style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s ease' }}>
-                         <svg className="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="transparent" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'stroke 0.2s ease' }}><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      </div>
+                      {(() => {
+                        const isSaved = crate.some(t => t.name === trackName && t.artist === artist);
+                        return (
+                          <button onClick={(e) => toggleCrate({ name: trackName, artist: artist, image: track.image, preview: track.preview }, e)} 
+                                  style={{ background: isSaved ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)', border: `1px solid ${isSaved ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)'}`, color: isSaved ? '#10b981' : 'var(--brand-primary)', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.2s' }}
+                                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                          >
+                             {isSaved ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg> : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>}
+                          </button>
+                        );
+                      })()}
                     </div>
                   )})
                 ) : (
