@@ -9,6 +9,7 @@ function App() {
   
   const [searchResults, setSearchResults] = useState(null); // Last.fm search matches
   const [recommendations, setRecommendations] = useState(null); // ML Output
+  const [seedTrack, setSeedTrack] = useState(null);
   
   const [loading, setLoading] = useState(false);
   const [currentQuery, setCurrentQuery] = useState(null);
@@ -26,6 +27,7 @@ function App() {
     
     setLoading(true);
     setRecommendations(null); // Clear previous recommendations
+    setSeedTrack(null);
     setCurrentQuery(`Search Results for: ${searchTrack}`);
     
     try {
@@ -44,7 +46,10 @@ function App() {
     }
   }
 
-  const selectSongAndRecommend = async (artist, track) => {
+  const selectSongAndRecommend = async (trackObj) => {
+    const artist = trackObj.artist;
+    const track = trackObj.name;
+    setSeedTrack(trackObj);
     setSearchResults(null); // Clear search results to transition UI to recommendations
     setLoading(true);
     setCurrentQuery(`${artist} - ${track}`);
@@ -210,12 +215,35 @@ function App() {
 
             {/* Hero Area */}
             {currentQuery && (
-              <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1000px' }} className="animate-slide-up">
-                <div>
+              <div style={{ marginBottom: '24px', maxWidth: '1000px' }} className="animate-slide-up">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h3 style={{ fontSize: '28px', color: 'var(--text-primary)', fontWeight: '700', letterSpacing: '-0.02em', margin: 0 }}>
                     {searchResults ? "Search Results" : "Neural Recommendations"}
                   </h3>
                 </div>
+                
+                {/* Seed Track Card */}
+                {seedTrack && !loading && (
+                  <div style={{ marginTop: '24px', padding: '16px 24px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05))', borderRadius: '16px', border: '1px solid var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '150px', background: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1))', pointerEvents: 'none' }}></div>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                      {seedTrack.image ? (
+                        <img src={seedTrack.image} alt="Seed Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, zIndex: 1 }}>
+                      <div style={{ fontSize: '11px', fontWeight: '800', color: 'var(--brand-primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px', fontFamily: 'Geist' }}>Seed Track</div>
+                      <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {seedTrack.name}
+                        <span style={{ fontSize: '14px', fontWeight: '400', color: 'var(--text-secondary)' }}>by {seedTrack.artist}</span>
+                      </h4>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -251,7 +279,7 @@ function App() {
                 {searchResults.length > 0 ? (
                   searchResults.map((track, i) => (
                     <div key={i} className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', animationDelay: `${i * 0.05}s` }}
-                         onClick={() => selectSongAndRecommend(track.artist, track.name)}
+                         onClick={() => selectSongAndRecommend(track)}
                     >
                       <div style={{ width: '64px', height: '64px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
                         {track.image ? (
