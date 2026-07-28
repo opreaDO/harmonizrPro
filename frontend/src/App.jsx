@@ -9,7 +9,7 @@ function App() {
   
   const [searchResults, setSearchResults] = useState(null); // Last.fm search matches
   const [recommendations, setRecommendations] = useState(null); // ML Output
-  const [seedTrack, setSeedTrack] = useState(null);
+  const [seedTracks, setSeedTracks] = useState([]);
   const [playingPreview, setPlayingPreview] = useState(null);
   const [previewProgress, setPreviewProgress] = useState(0);
   const [crate, setCrate] = useState(() => {
@@ -74,7 +74,6 @@ function App() {
     
     setLoading(true);
     setRecommendations(null); // Clear previous recommendations
-    setSeedTrack(null);
     setPlayingPreview(null); // Stop preview when a new search is initiated
     setCurrentQuery(`Search Results for: ${searchTrack}`);
     
@@ -94,17 +93,40 @@ function App() {
     }
   }
 
-  const selectSongAndRecommend = async (trackObj) => {
-    const artist = trackObj.artist;
-    const track = trackObj.name;
-    setSeedTrack(trackObj);
-    setSearchResults(null); // Clear search results to transition UI to recommendations
-    setPlayingPreview(null); // Stop preview when a song is selected
+  const addSeedTrack = (trackObj) => {
+    if (!seedTracks.some(t => t.name === trackObj.name && t.artist === trackObj.artist)) {
+      setSeedTracks([...seedTracks, trackObj]);
+    }
+    setSearchResults(null);
+    setSearchTrack('');
+    setSearchArtist('');
+    setPlayingPreview(null);
+  };
+
+  const removeSeedTrack = (index) => {
+    const newSeeds = [...seedTracks];
+    newSeeds.splice(index, 1);
+    setSeedTracks(newSeeds);
+    if (newSeeds.length === 0) {
+       setRecommendations(null);
+       setCurrentQuery(null);
+    }
+  };
+
+  const generateMultiRecommendations = async () => {
+    if (seedTracks.length === 0) return;
     setLoading(true);
-    setCurrentQuery(`${artist} - ${track}`);
+    setRecommendations(null);
+    setPlayingPreview(null);
+    setCurrentQuery(`${seedTracks.length} Seed Tracks`);
     
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/bridge_recommend?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&use_fallback=${useFallback}&use_super_tags=${useSuperTags}`);
+      const formattedTracks = seedTracks.map(t => ({ artist: t.artist, track: t.name }));
+      const response = await fetch('http://127.0.0.1:8000/api/v1/multi_recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tracks: formattedTracks, top_k: 20 })
+      });
       if (!response.ok) throw new Error("API Error");
       const data = await response.json();
       setRecommendations(data.recommendations);
@@ -376,40 +398,50 @@ function App() {
             </section>
 
             {/* Hero Area */}
-            {currentQuery && (
+            {(currentQuery || seedTracks.length > 0) && (
               <div style={{ marginBottom: '24px', maxWidth: '1000px' }} className="animate-slide-up">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h3 style={{ fontSize: '28px', color: 'var(--text-primary)', fontWeight: '700', letterSpacing: '-0.02em', margin: 0 }}>
-                    {searchResults ? "Search Results" : "Neural Recommendations"}
+                    {searchResults ? "Search Results" : "Acoustic Seeds"}
                   </h3>
+                  {!searchResults && seedTracks.length > 0 && (
+                     <button onClick={generateMultiRecommendations} style={{ padding: '10px 20px', background: 'var(--brand-primary)', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)' }}
+                             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                        Generate Recommendations
+                     </button>
+                  )}
                 </div>
                 
-                {/* Seed Track Card */}
-                {seedTrack && !loading && (
-                  <div style={{ marginTop: '24px', padding: '16px 24px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05))', borderRadius: '16px', border: '1px solid var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-                      {seedTrack.image ? (
-                        <img src={seedTrack.image} alt="Seed Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
-                        <div style={{ width: '100%', height: '100%', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                {/* Seed Track Cards */}
+                {!loading && seedTracks.length > 0 && !searchResults && (
+                  <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', padding: '16px 0', paddingBottom: '24px' }}>
+                     {seedTracks.map((track, idx) => (
+                        <div key={idx} style={{ flexShrink: 0, width: '280px', padding: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05))', borderRadius: '16px', border: '1px solid var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative' }}>
+                          <button onClick={() => removeSeedTrack(idx)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(255, 255, 255, 0.1)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 77, 77, 0.8)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}>×</button>
+                          <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                            {track.image ? (
+                              <img src={track.image} alt="Seed Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <div style={{ width: '100%', height: '100%', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0, paddingRight: '12px' }}>
+                            <div style={{ fontSize: '10px', fontWeight: '800', color: 'var(--brand-primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px', fontFamily: 'Geist' }}>Seed {idx + 1}</div>
+                            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.name}</h4>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>{track.artist}</span>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    <div style={{ flex: 1, zIndex: 1 }}>
-                      <div style={{ fontSize: '11px', fontWeight: '800', color: 'var(--brand-primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px', fontFamily: 'Geist' }}>Seed Track</div>
-                      <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {seedTrack.name}
-                        <span style={{ fontSize: '14px', fontWeight: '400', color: 'var(--text-secondary)' }}>by {seedTrack.artist}</span>
-                      </h4>
-                    </div>
+                     ))}
                   </div>
                 )}
               </div>
             )}
 
             {/* Empty State */}
-            {!currentQuery && !loading && (
+            {!currentQuery && !loading && seedTracks.length === 0 && (
               <div style={{ height: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.5 }}>
                 <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: 'var(--bg-highlight)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -440,7 +472,7 @@ function App() {
                 {searchResults.length > 0 ? (
                   searchResults.map((track, i) => (
                     <div key={i} className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', animationDelay: `${i * 0.05}s` }}
-                         onClick={() => selectSongAndRecommend(track)}
+                         onClick={() => addSeedTrack(track)}
                     >
                       <div style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: playingPreview === track.preview ? `conic-gradient(var(--brand-primary) ${previewProgress}%, transparent 0)` : 'transparent', padding: playingPreview === track.preview ? '2px' : '0px', transition: 'padding 0.2s' }}
                            onClick={(e) => {
@@ -484,7 +516,7 @@ function App() {
                              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                         >
-                           Select
+                           Add Seed
                         </div>
                       </div>
                     </div>
