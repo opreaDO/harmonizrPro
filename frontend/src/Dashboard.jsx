@@ -63,8 +63,6 @@ export default function Dashboard({ username }) {
       {/* KPI Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="glass-panel" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'rgba(59, 130, 246, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0', pointerEvents: 'none' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '150px', height: '150px', background: 'rgba(14, 165, 233, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '0 0 -50px -50px', pointerEvents: 'none' }}></div>
           <div style={{ position: 'relative', zIndex: 2 }}>
             <h3 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '24px' }}>
               <span className="material-symbols-outlined" style={{ color: '#3b82f6' }}>graphic_eq</span>
@@ -76,8 +74,6 @@ export default function Dashboard({ username }) {
         </div>
 
         <div className="glass-panel" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'rgba(236, 72, 153, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0', pointerEvents: 'none' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '150px', height: '150px', background: 'rgba(168, 85, 247, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '0 0 -50px -50px', pointerEvents: 'none' }}></div>
           <div style={{ position: 'relative', zIndex: 2 }}>
             <h3 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '24px' }}>
               <span className="material-symbols-outlined" style={{ color: '#ec4899' }}>album</span>
@@ -89,8 +85,6 @@ export default function Dashboard({ username }) {
         </div>
 
         <div className="glass-panel" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'rgba(20, 184, 166, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0', pointerEvents: 'none' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '150px', height: '150px', background: 'rgba(16, 185, 129, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '0 0 -50px -50px', pointerEvents: 'none' }}></div>
           <div style={{ position: 'relative', zIndex: 2 }}>
             <h3 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '24px' }}>
               <span className="material-symbols-outlined" style={{ color: '#14b8a6' }}>blur_on</span>
@@ -106,8 +100,6 @@ export default function Dashboard({ username }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Chronotype Card */}
         <div className="glass-panel" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'rgba(139, 92, 246, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0', pointerEvents: 'none' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '150px', height: '150px', background: 'rgba(79, 70, 229, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '0 0 -50px -50px', pointerEvents: 'none' }}></div>
           <div style={{ position: 'relative', zIndex: 2 }}>
             <h3 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '24px' }}>
               <span className="material-symbols-outlined" style={{ color: '#8b5cf6' }}>schedule</span>
@@ -120,8 +112,6 @@ export default function Dashboard({ username }) {
 
         {/* Binge Factor Card */}
         <div className="glass-panel" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'rgba(244, 63, 94, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0', pointerEvents: 'none' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '150px', height: '150px', background: 'rgba(249, 115, 22, 0.35)', filter: 'blur(80px)', borderRadius: '50%', margin: '0 0 -50px -50px', pointerEvents: 'none' }}></div>
           <div style={{ position: 'relative', zIndex: 2 }}>
             <h3 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '24px' }}>
               <span className="material-symbols-outlined" style={{ color: '#f43f5e' }}>local_fire_department</span>
@@ -140,8 +130,6 @@ export default function Dashboard({ username }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Top Artists Card */}
         <div className="lg:col-span-8 glass-panel flex flex-col min-h-[400px]" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'rgba(234, 179, 8, 0.25)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0', pointerEvents: 'none' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '150px', height: '150px', background: 'rgba(245, 158, 11, 0.25)', filter: 'blur(80px)', borderRadius: '50%', margin: '0 0 -50px -50px', pointerEvents: 'none' }}></div>
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div className="flex justify-between items-center mb-6">
               <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#dae2fd', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0 }}>
@@ -173,8 +161,6 @@ export default function Dashboard({ username }) {
 
         {/* Recent Tracks */}
         <div className="lg:col-span-4 glass-panel" style={{ padding: '32px', position: 'relative', overflow: 'hidden', minHeight: '400px', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'var(--brand-secondary-glow)', filter: 'blur(80px)', borderRadius: '50%', margin: '-80px -80px 0 0', pointerEvents: 'none' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '150px', height: '150px', background: 'var(--brand-primary-glow)', filter: 'blur(80px)', borderRadius: '50%', margin: '0 0 -50px -50px', pointerEvents: 'none' }}></div>
           
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <h3 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0 }}>

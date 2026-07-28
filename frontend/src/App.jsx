@@ -248,8 +248,6 @@ function App() {
 
             {/* Big Search Blob */}
             <section className="glass-panel" style={{ padding: '32px', position: 'relative', overflow: 'hidden', marginBottom: '48px', maxWidth: '1000px', width: '100%' }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, width: '300px', height: '300px', background: 'var(--brand-primary-glow)', filter: 'blur(80px)', borderRadius: '50%', margin: '-100px -100px 0 0', pointerEvents: 'none' }}></div>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, width: '200px', height: '200px', background: 'var(--brand-secondary-glow)', filter: 'blur(80px)', borderRadius: '50%', margin: '0 0 -100px -100px', pointerEvents: 'none' }}></div>
               
               <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 2 }}>
                 <div>
@@ -341,7 +339,6 @@ function App() {
                 {/* Seed Track Card */}
                 {seedTrack && !loading && (
                   <div style={{ marginTop: '24px', padding: '16px 24px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05))', borderRadius: '16px', border: '1px solid var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '150px', background: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1))', pointerEvents: 'none' }}></div>
                     <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
                       {seedTrack.image ? (
                         <img src={seedTrack.image} alt="Seed Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
