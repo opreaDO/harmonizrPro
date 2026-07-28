@@ -159,6 +159,75 @@ async def get_bridge_recommendations(artist: str, track: str, use_fallback: bool
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+class TrackItem(BaseModel):
+    artist: str
+    track: str
+
+class MultiRecommendRequest(BaseModel):
+    tracks: List[TrackItem]
+    top_k: int = 20
+
+@router.post("/multi_recommend", response_model=RecommendationResponse)
+async def get_multi_recommendations(request: MultiRecommendRequest, db: Session = Depends(get_db)):
+    """
+    Intersection method for multiple seed tracks:
+    Fetches recommendations for each track individually, then exponentially boosts scores 
+    for tracks that appear in multiple lists.
+    """
+    if not recommender:
+        raise HTTPException(status_code=503, detail="ML engine is not fully loaded.")
+        
+    try:
+        from collections import defaultdict
+        
+        all_recs_scores = defaultdict(float)
+        all_recs_counts = defaultdict(int)
+        
+        for item in request.tracks:
+            artist, track = item.artist, item.track
+            tags = LastFMClient.get_track_tags(artist, track)
+            if not tags:
+                tags = LastFMClient.get_artist_tags(artist)
+            
+            # Fast-path check
+            track_rows = db.query(Track).filter(Track.artist_name.ilike(artist), Track.title.ilike(track)).all()
+            fast_path_used = False
+            for track_row in track_rows:
+                if track_row.song_id in recommender.track_to_idx:
+                    recs = recommender.get_similar_tracks(track_row.song_id, top_k=request.top_k)
+                    fast_path_used = True
+                    break
+            
+            if not fast_path_used and tags:
+                recs = recommender.recommend_for_cold_track(tags, top_k=request.top_k)
+            elif not fast_path_used:
+                recs = []
+                
+            for song_id, score in recs:
+                all_recs_scores[song_id] += score
+                all_recs_counts[song_id] += 1
+                
+        # Intersection Boost
+        final_scores = []
+        for song_id, base_score in all_recs_scores.items():
+            count = all_recs_counts[song_id]
+            # Exponentially reward tracks that show up in multiple seed searches
+            boosted_score = base_score * (count ** 1.5)
+            final_scores.append((song_id, boosted_score))
+            
+        final_scores.sort(key=lambda x: x[1], reverse=True)
+        top_final = final_scores[:request.top_k]
+        
+        if not top_final:
+            return {"search_query": f"Intersection of {len(request.tracks)} tracks", "recommendations": []}
+            
+        translated = translate_ids_to_tracks(db, top_final)
+        translated_with_images = await attach_itunes_images(translated)
+        
+        return {"search_query": f"Intersection of {len(request.tracks)} tracks", "recommendations": translated_with_images}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/search_track")
 async def search_track(query: str):
     """
