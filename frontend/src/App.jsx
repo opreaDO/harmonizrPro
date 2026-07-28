@@ -11,6 +11,7 @@ function App() {
   const [recommendations, setRecommendations] = useState(null); // ML Output
   const [seedTrack, setSeedTrack] = useState(null);
   const [playingPreview, setPlayingPreview] = useState(null);
+  const [previewProgress, setPreviewProgress] = useState(0);
   const [crate, setCrate] = useState(() => {
     try { return JSON.parse(localStorage.getItem('harmonizr_crate')) || []; }
     catch { return []; }
@@ -191,7 +192,7 @@ function App() {
                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '1000px' }}>
                  {crate.map((track, i) => (
                    <div key={i} className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '20px', animationDelay: `${i * 0.05}s` }}>
-                     <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}
+                     <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: playingPreview === track.preview ? `conic-gradient(var(--brand-primary) ${previewProgress}%, transparent 0)` : 'transparent', padding: playingPreview === track.preview ? '2px' : '0px', transition: 'padding 0.2s' }}
                           onClick={(e) => {
                               if (track.preview) {
                                   e.stopPropagation();
@@ -200,6 +201,7 @@ function App() {
                               }
                           }}
                      >
+                       <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: playingPreview === track.preview ? '10px' : '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                        {track.image ? (
                          <img src={track.image} alt="Album Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                        ) : (
@@ -219,6 +221,7 @@ function App() {
                             )}
                          </div>
                        )}
+                     </div>
                      </div>
                      
                      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -394,7 +397,7 @@ function App() {
                     <div key={i} className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', animationDelay: `${i * 0.05}s` }}
                          onClick={() => selectSongAndRecommend(track)}
                     >
-                      <div style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}
+                      <div style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: playingPreview === track.preview ? `conic-gradient(var(--brand-primary) ${previewProgress}%, transparent 0)` : 'transparent', padding: playingPreview === track.preview ? '2px' : '0px', transition: 'padding 0.2s' }}
                            onClick={(e) => {
                                if (track.preview) {
                                    e.stopPropagation();
@@ -403,6 +406,7 @@ function App() {
                                }
                            }}
                       >
+                        <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: playingPreview === track.preview ? '10px' : '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                         {track.image ? (
                           <img src={track.image} alt="Album Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
@@ -422,6 +426,7 @@ function App() {
                              )}
                           </div>
                         )}
+                        </div>
                       </div>
 
                       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -474,7 +479,7 @@ function App() {
                            }
                          }}
                     >
-                      <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}
+                      <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: playingPreview === track.preview ? `conic-gradient(var(--brand-primary) ${previewProgress}%, transparent 0)` : 'transparent', padding: playingPreview === track.preview ? '2px' : '0px', transition: 'padding 0.2s' }}
                            onClick={(e) => {
                                if (track.preview) {
                                    e.stopPropagation();
@@ -483,6 +488,7 @@ function App() {
                                }
                            }}
                       >
+                        <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: playingPreview === track.preview ? '10px' : '12px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                         {track.image ? (
                           <img src={track.image} alt="Album Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
@@ -502,6 +508,7 @@ function App() {
                              )}
                           </div>
                         )}
+                        </div>
                       </div>
                       
                       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -554,7 +561,10 @@ function App() {
         />
       )}
       
-      {playingPreview && <audio src={playingPreview} autoPlay onEnded={() => setPlayingPreview(null)} />}
+      {playingPreview && <audio src={playingPreview} autoPlay 
+          onTimeUpdate={(e) => setPreviewProgress((e.target.currentTime / e.target.duration) * 100 || 0)}
+          onEnded={() => { setPlayingPreview(null); setPreviewProgress(0); }} 
+      />}
 
       <style>{`
         @keyframes pulse {

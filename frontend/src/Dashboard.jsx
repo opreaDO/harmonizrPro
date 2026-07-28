@@ -5,6 +5,7 @@ export default function Dashboard({ username }) {
   const [loading, setLoading] = useState(true);
   const [timeScale, setTimeScale] = useState('overall');
   const [playingPreview, setPlayingPreview] = useState(null);
+  const [previewProgress, setPreviewProgress] = useState(0);
 
   useEffect(() => {
     if (!username) {
@@ -172,7 +173,7 @@ export default function Dashboard({ username }) {
           <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {(stats?.recent_tracks || []).slice(0, 5).map((track, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                <div style={{ position: 'relative', width: '48px', height: '48px', borderRadius: '10px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}
+                <div style={{ position: 'relative', width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: playingPreview === track.preview ? `conic-gradient(var(--brand-primary) ${previewProgress}%, transparent 0)` : 'transparent', padding: playingPreview === track.preview ? '2px' : '0px', transition: 'padding 0.2s' }}
                      onClick={(e) => {
                          if (track.preview) {
                              e.stopPropagation();
@@ -181,6 +182,7 @@ export default function Dashboard({ username }) {
                          }
                      }}
                 >
+                  <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: playingPreview === track.preview ? '8px' : '10px', background: 'var(--bg-highlight)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                    {track.itunes_image || (track.image && track.image[2] && track.image[2]['#text']) ? (
                      <img src={track.itunes_image || track.image[2]['#text']} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                    ) : (
@@ -198,6 +200,7 @@ export default function Dashboard({ username }) {
                         )}
                      </div>
                    )}
+                  </div>
                 </div>
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: '15px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.name}</span>
@@ -208,7 +211,10 @@ export default function Dashboard({ username }) {
           </div>
         </div>
       </div>
-      {playingPreview && <audio src={playingPreview} autoPlay onEnded={() => setPlayingPreview(null)} />}
+      {playingPreview && <audio src={playingPreview} autoPlay 
+          onTimeUpdate={(e) => setPreviewProgress((e.target.currentTime / e.target.duration) * 100 || 0)}
+          onEnded={() => { setPlayingPreview(null); setPreviewProgress(0); }} 
+      />}
     </div>
   );
 }
