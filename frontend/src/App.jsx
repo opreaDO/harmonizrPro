@@ -422,17 +422,37 @@ function App() {
                 {!loading && seedTracks.length > 0 && !searchResults && (
                   <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '16px', paddingBottom: '16px' }}>
                      {seedTracks.map((track, idx) => (
-                        <div key={idx} className="glass-panel animate-smooth-reveal" style={{ flexShrink: 0, width: '280px', padding: '16px', borderRadius: '16px', border: '1px solid rgba(139, 92, 246, 0.5)', background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(88, 28, 135, 0.3))', boxShadow: '0 8px 32px rgba(139, 92, 246, 0.15), inset 0 0 20px rgba(139, 92, 246, 0.05)', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}>
+                        <div key={idx} className="glass-panel animate-smooth-reveal" style={{ flexShrink: 0, width: '280px', padding: '16px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(88, 28, 135, 0.3))', boxShadow: '0 8px 32px rgba(139, 92, 246, 0.15), inset 0 0 20px rgba(139, 92, 246, 0.05)', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}>
                           <div style={{ position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%', background: 'radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 60%)', pointerEvents: 'none' }}></div>
                           <button onClick={() => removeSeedTrack(idx)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', transition: 'all 0.2s', zIndex: 2 }} onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 77, 77, 0.8)'; e.currentTarget.style.borderColor = 'rgba(255, 77, 77, 1)'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}>×</button>
-                          <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', zIndex: 2 }}>
+                          <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: playingPreview === track.preview ? `conic-gradient(var(--brand-secondary) ${previewProgress}%, transparent 0)` : 'transparent', padding: playingPreview === track.preview ? '2px' : '0px', transition: 'padding 0.2s', zIndex: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}
+                               onClick={(e) => {
+                                   if (track.preview) {
+                                       e.stopPropagation();
+                                       if (playingPreview === track.preview) setPlayingPreview(null);
+                                       else setPlayingPreview(track.preview);
+                                   }
+                               }}
+                          >
+                            <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: playingPreview === track.preview ? '10px' : '12px', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                             {track.image ? (
                               <img src={track.image} alt="Seed Art" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
-                              <div style={{ width: '100%', height: '100%', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                            )}
+                            {track.preview && (
+                              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', cursor: 'pointer' }}
+                                   onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.7)'}
+                                   onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.5)'}
+                              >
+                                 {playingPreview === track.preview ? (
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                                 ) : (
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                 )}
                               </div>
                             )}
+                            </div>
                           </div>
                           <div style={{ flex: 1, minWidth: 0, paddingRight: '12px' }}>
                             <div style={{ fontSize: '10px', fontWeight: '800', color: 'var(--brand-primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px', fontFamily: 'Geist' }}>Seed {idx + 1}</div>
