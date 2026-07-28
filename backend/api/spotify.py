@@ -19,13 +19,13 @@ class ExportRequest(BaseModel):
 
 @router.post("/export_spotify")
 def export_to_spotify(request: ExportRequest):
-    # Ensure environment variables are loaded
+    # Ensure environment variables are loaded (override any stale ones in memory)
     env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
-    load_dotenv(env_path)
+    load_dotenv(env_path, override=True)
     
     # Initialize Spotipy
     try:
-        scope = "playlist-modify-public playlist-modify-private"
+        scope = "playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative"
         cache_path = os.path.join(os.path.dirname(__file__), '..', '..', '.cache')
         sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, cache_path=cache_path))
         user = sp.current_user()
@@ -56,16 +56,25 @@ def export_to_spotify(request: ExportRequest):
     if not track_uris:
         raise HTTPException(status_code=400, detail="Could not find any of the requested tracks on Spotify.")
 
-    # 2. Create the playlist
+    # 2. Create the playlist manually using the undocumented /me/playlists endpoint to bypass the 403 Forbidden bug
     playlist_name = request.playlist_name or f"Harmonizr Discovery - {datetime.now().strftime('%b %d, %Y')}"
     
+    import requests
+    token_info = sp.auth_manager.get_cached_token()
+    headers = {
+        "Authorization": f"Bearer {token_info['access_token']}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "name": playlist_name,
+        "public": False,
+        "description": "Exported from Harmonizr Pro"
+    }
+    
     try:
-        playlist = sp.user_playlist_create(
-            user=user_id,
-            name=playlist_name,
-            public=True,
-            description="Exported from Harmonizr Pro"
-        )
+        res = requests.post("https://api.spotify.com/v1/me/playlists", headers=headers, json=payload)
+        res.raise_for_status()
+        playlist = res.json()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create playlist: {str(e)}")
 

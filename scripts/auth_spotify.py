@@ -7,8 +7,8 @@ def main():
     # Load environment variables from the root .env file, overriding any shell defaults
     load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'), override=True)
 
-    # We need the 'playlist-modify-public' and 'playlist-modify-private' scopes to create playlists.
-    scope = "playlist-modify-public playlist-modify-private"
+    # We need full playlist scopes because Spotify sometimes 403s on creation if it can't read the resulting playlist back to us
+    scope = "playlist-modify-public playlist-modify-private playlist-read-private playlist-read-collaborative"
 
     print("Authenticating with Spotify...")
     # This will open a browser window for you to log into your Spotify account.
