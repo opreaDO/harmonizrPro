@@ -93,12 +93,25 @@ async def get_user_stats(
             binge_artist = prev_artist
 
     recent_tracks_enriched = await attach_itunes_to_lastfm(recent_tracks_for_stats[:5])
+    top_tracks_enriched = await attach_itunes_to_lastfm(top_tracks[:5])
+    
+    top_tags = LastFMClient.get_user_top_tags(username, limit=10)
+    if not top_tags:
+        # Fallback: aggregate top artists' tags
+        tag_counts = {}
+        for a in top_artists[:5]:
+            tags = LastFMClient.get_artist_tags(a.get("name", ""))
+            for t in tags[:3]:
+                tag_counts[t] = tag_counts.get(t, 0) + 1
+        sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
+        top_tags = [{"name": t[0], "count": t[1]} for t in sorted_tags[:10]]
 
     return {
         "info": info,
         "top_artists": top_artists,
-        "top_tracks": top_tracks,
+        "top_tracks": top_tracks_enriched,
         "recent_tracks": recent_tracks_enriched,
+        "top_tags": top_tags,
         "chronotype": chronotype,
         "binge": {"artist": binge_artist, "streak": max_streak}
     }

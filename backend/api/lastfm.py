@@ -188,3 +188,13 @@ class LastFMClient:
             if isinstance(tracks, dict): tracks = [tracks]
             return tracks
         return []
+
+    @staticmethod
+    def get_user_top_tags(username: str, limit: int = 10):
+        params = {"method": "user.gettoptags", "user": username, "api_key": LASTFM_API_KEY, "format": "json", "limit": limit}
+        res = requests.get(LastFMClient.BASE_URL, params=params)
+        if res.status_code == 200:
+            tags = res.json().get("toptags", {}).get("tag", [])
+            if isinstance(tags, dict): tags = [tags]
+            return tags
+        return []
