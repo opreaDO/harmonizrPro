@@ -10,6 +10,7 @@ function App() {
   const [searchResults, setSearchResults] = useState(null); // Last.fm search matches
   const [recommendations, setRecommendations] = useState(null); // ML Output
   const [seedTracks, setSeedTracks] = useState([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [playingPreview, setPlayingPreview] = useState(null);
   const [previewProgress, setPreviewProgress] = useState(0);
   const [crate, setCrate] = useState(() => {
@@ -94,13 +95,17 @@ function App() {
   }
 
   const addSeedTrack = (trackObj) => {
-    if (!seedTracks.some(t => t.name === trackObj.name && t.artist === trackObj.artist)) {
-      setSeedTracks([...seedTracks, trackObj]);
-    }
-    setSearchResults(null);
-    setSearchTrack('');
-    setSearchArtist('');
-    setPlayingPreview(null);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      if (!seedTracks.some(t => t.name === trackObj.name && t.artist === trackObj.artist)) {
+        setSeedTracks([...seedTracks, trackObj]);
+      }
+      setSearchResults(null);
+      setSearchTrack('');
+      setSearchArtist('');
+      setPlayingPreview(null);
+      setIsTransitioning(false);
+    }, 300);
   };
 
   const removeSeedTrack = (index) => {
@@ -415,9 +420,9 @@ function App() {
                 
                 {/* Seed Track Cards */}
                 {!loading && seedTracks.length > 0 && !searchResults && (
-                  <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', padding: '16px 0', paddingBottom: '24px' }}>
+                  <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', padding: '24px 16px' }}>
                      {seedTracks.map((track, idx) => (
-                        <div key={idx} className="glass-panel" style={{ flexShrink: 0, width: '280px', padding: '16px', borderRadius: '16px', border: '1px solid rgba(139, 92, 246, 0.5)', background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(88, 28, 135, 0.3))', boxShadow: '0 8px 32px rgba(139, 92, 246, 0.15), inset 0 0 20px rgba(139, 92, 246, 0.05)', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}>
+                        <div key={idx} className="glass-panel animate-pop-in" style={{ flexShrink: 0, width: '280px', padding: '16px', borderRadius: '16px', border: '1px solid rgba(139, 92, 246, 0.5)', background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(88, 28, 135, 0.3))', boxShadow: '0 8px 32px rgba(139, 92, 246, 0.15), inset 0 0 20px rgba(139, 92, 246, 0.05)', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}>
                           <div style={{ position: 'absolute', top: '-50%', left: '-50%', width: '200%', height: '200%', background: 'radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 60%)', pointerEvents: 'none' }}></div>
                           <button onClick={() => removeSeedTrack(idx)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', transition: 'all 0.2s', zIndex: 2 }} onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 77, 77, 0.8)'; e.currentTarget.style.borderColor = 'rgba(255, 77, 77, 1)'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}>×</button>
                           <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', zIndex: 2 }}>
@@ -469,7 +474,7 @@ function App() {
 
             {/* Step 1: Search Results List View */}
             {!loading && searchResults && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '1000px', width: '100%' }} className="animate-slide-up">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '1000px', width: '100%' }} className={isTransitioning ? "animate-fade-out" : "animate-slide-up"}>
                 {searchResults.length > 0 ? (
                   searchResults.map((track, i) => (
                     <div key={i} className="glass-panel" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '20px', cursor: 'pointer', animationDelay: `${i * 0.05}s` }}
