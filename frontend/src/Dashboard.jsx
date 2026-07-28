@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-export default function Dashboard({ username }) {
+export default function Dashboard({ username, playingPreview, setPlayingPreview, previewProgress }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeScale, setTimeScale] = useState('overall');
-  const [playingPreview, setPlayingPreview] = useState(null);
-  const [previewProgress, setPreviewProgress] = useState(0);
 
   useEffect(() => {
     if (!username) {
@@ -211,10 +209,6 @@ export default function Dashboard({ username }) {
           </div>
         </div>
       </div>
-      {playingPreview && <audio src={playingPreview} autoPlay 
-          onTimeUpdate={(e) => setPreviewProgress((e.target.currentTime / e.target.duration) * 100 || 0)}
-          onEnded={() => { setPlayingPreview(null); setPreviewProgress(0); }} 
-      />}
     </div>
   );
 }

@@ -41,6 +41,11 @@ function App() {
   const [lastFmUsername, setLastFmUsername] = useState(() => localStorage.getItem('lastFmUsername') || '');
   const [showPopup, setShowPopup] = useState(() => !localStorage.getItem('lastFmUsername'));
 
+  // Stop playing preview when view changes
+  useEffect(() => {
+    setPlayingPreview(null);
+  }, [currentView]);
+
   const handleSearch = async (e) => {
     e?.preventDefault();
     if (!searchTrack) return;
@@ -48,6 +53,7 @@ function App() {
     setLoading(true);
     setRecommendations(null); // Clear previous recommendations
     setSeedTrack(null);
+    setPlayingPreview(null); // Stop preview when a new search is initiated
     setCurrentQuery(`Search Results for: ${searchTrack}`);
     
     try {
@@ -71,6 +77,7 @@ function App() {
     const track = trackObj.name;
     setSeedTrack(trackObj);
     setSearchResults(null); // Clear search results to transition UI to recommendations
+    setPlayingPreview(null); // Stop preview when a song is selected
     setLoading(true);
     setCurrentQuery(`${artist} - ${track}`);
     
@@ -164,7 +171,12 @@ function App() {
         
         {/* Dashboard View - Hidden via CSS when not active to preserve state/cache */}
         <div style={{ display: currentView === 'dashboard' ? 'block' : 'none' }} className={currentView === 'dashboard' ? 'animate-slide-up' : ''}>
-          <Dashboard username={lastFmUsername} />
+          <Dashboard 
+            username={lastFmUsername} 
+            playingPreview={playingPreview} 
+            setPlayingPreview={setPlayingPreview} 
+            previewProgress={previewProgress} 
+          />
         </div>
 
         {/* Crate View */}
