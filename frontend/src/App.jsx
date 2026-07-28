@@ -35,6 +35,28 @@ function App() {
   const [currentQuery, setCurrentQuery] = useState(null);
   const [useFallback, setUseFallback] = useState(true);
   const [useSuperTags, setUseSuperTags] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportResult, setExportResult] = useState(null);
+
+  const exportToSpotify = async () => {
+    setExporting(true);
+    setExportResult(null);
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/v1/export_spotify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tracks: crate })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Export failed');
+      setExportResult({ success: true, url: data.playlist_url, added: data.tracks_added });
+    } catch (err) {
+      console.error(err);
+      setExportResult({ success: false, error: err.message });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   // App state
   const [currentView, setCurrentView] = useState('dashboard');
@@ -186,13 +208,24 @@ function App() {
                 <h2 className="text-gradient" style={{ fontSize: '56px', fontWeight: '800', letterSpacing: '-0.03em', margin: 0, lineHeight: '1.1' }}>My Crate</h2>
                 <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginTop: '8px' }}>Your staging queue for Spotify exports.</p>
               </div>
-              <button style={{ padding: '12px 24px', background: 'var(--brand-primary)', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: '700', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: crate.length === 0 ? 0.5 : 1, pointerEvents: crate.length === 0 ? 'none' : 'auto' }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Export to Spotify
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                <button onClick={exportToSpotify} style={{ padding: '12px 24px', background: 'var(--brand-primary)', borderRadius: '12px', color: '#fff', fontSize: '14px', fontWeight: '700', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: (crate.length === 0 || exporting) ? 0.5 : 1, pointerEvents: (crate.length === 0 || exporting) ? 'none' : 'auto', transition: 'all 0.2s' }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  {exporting ? 'Exporting...' : 'Export to Spotify'}
+                </button>
+                {exportResult && exportResult.success && (
+                  <a href={exportResult.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '13px', color: '#10b981', fontWeight: '600', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                     Open Playlist ({exportResult.added} tracks)
+                  </a>
+                )}
+                {exportResult && !exportResult.success && (
+                  <span style={{ fontSize: '13px', color: '#FF4D4D', fontWeight: '600' }}>Error: {exportResult.error}</span>
+                )}
+              </div>
             </div>
             
             {crate.length === 0 ? (
