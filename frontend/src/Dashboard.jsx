@@ -61,20 +61,20 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
 
       {/* KPI Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="glass-panel" style={{ padding: '20px', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '12px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '16px' }}>
               <span className="material-symbols-outlined" style={{ color: '#3b82f6', fontSize: '20px' }}>graphic_eq</span>
-              Total Scrobbling
+              Total Scrobbles
             </h3>
             <div className="text-gradient" style={{ fontSize: '36px', fontFamily: '"Hanken Grotesk"', fontWeight: '800', letterSpacing: '-0.02em', marginBottom: '4px' }}>{playcount > 1000 ? playcountK : playcount}<span style={{ fontSize: '20px', color: 'var(--brand-primary)' }}>{playcount > 1000 ? 'k' : ''}</span></div>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>All time scrobbles</div>
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '20px', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '12px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '16px' }}>
               <span className="material-symbols-outlined" style={{ color: '#ec4899', fontSize: '20px' }}>album</span>
               Top Artist
             </h3>
@@ -83,9 +83,9 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '20px', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '12px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '16px' }}>
               <span className="material-symbols-outlined" style={{ color: '#14b8a6', fontSize: '20px' }}>blur_on</span>
               User Since
             </h3>
@@ -102,22 +102,22 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
             <div className="flex justify-between items-center mb-4">
               <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#dae2fd', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0 }}>
                 <span className="material-symbols-outlined text-[18px]" style={{ color: '#eab308' }}>star</span>
-                Top Resonance (Artists)
+                Top Artists
               </h3>
             </div>
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-            {topartists.map((artist, i) => {
+            <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {topartists.slice(0, 5).map((artist, i) => {
               const maxPlays = parseInt(topartists[0]?.playcount) || 1;
               const plays = parseInt(artist.playcount) || 0;
               const percentage = Math.max(10, (plays / maxPlays) * 100);
               
               return (
-                <div key={i} className="group cursor-pointer">
-                  <div className="flex justify-between font-body-sm mb-1">
-                    <span className="text-on-background font-medium">{artist.name}</span>
+                <div key={i} className="group cursor-pointer" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '72px', boxSizing: 'border-box', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-on-background font-medium" style={{ fontSize: '15px' }}>{artist.name}</span>
                     <span style={{ fontSize: '12px', fontWeight: '500', fontFamily: 'Geist', letterSpacing: '0.05em', color: '#958ea0' }}>{plays} plays</span>
                   </div>
-                  <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden mt-1">
                     <div className="h-full bg-gradient-to-r from-primary-container to-primary rounded-full group-hover:brightness-125 transition-all" style={{ width: `${percentage}%` }}></div>
                   </div>
                 </div>
@@ -132,13 +132,13 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0 }}>
               <span className="material-symbols-outlined" style={{ color: '#f43f5e', fontSize: '20px' }}>military_tech</span>
-              Top Anthems
+              Top Tracks
             </h3>
           </div>
           
           <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {(stats?.top_tracks || []).slice(0, 5).map((track, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', height: '72px', boxSizing: 'border-box', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
                 <div style={{ position: 'relative', width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: playingPreview === track.preview ? `conic-gradient(var(--brand-primary) ${previewProgress}%, transparent 0)` : 'transparent', padding: playingPreview === track.preview ? '2px' : '0px', transition: 'padding 0.2s' }}
                      onClick={(e) => {
                          if (track.preview) {
@@ -168,9 +168,21 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
                    )}
                   </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '15px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.name}</span>
-                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.artist?.['#text'] || track.artist?.name || track.artist}</span>
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div className="flex justify-between items-center mb-1">
+                    <div className="flex flex-col min-w-0 pr-2">
+                      <span style={{ fontSize: '15px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.name}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.artist?.['#text'] || track.artist?.name || track.artist}</span>
+                    </div>
+                    {track.playcount && (
+                      <span style={{ fontSize: '12px', fontWeight: '500', fontFamily: 'Geist', letterSpacing: '0.05em', color: '#958ea0', whiteSpace: 'nowrap' }}>{track.playcount} plays</span>
+                    )}
+                  </div>
+                  {track.playcount && (
+                    <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden mt-1.5">
+                      <div className="h-full bg-gradient-to-r from-primary-container to-primary rounded-full transition-all" style={{ width: `${Math.max(10, (parseInt(track.playcount) / (parseInt(stats.top_tracks[0]?.playcount) || 1)) * 100)}%` }}></div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -183,13 +195,13 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-              Recent Scrobbling
+              Recent Tracks
             </h3>
           </div>
           
           <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {(stats?.recent_tracks || []).slice(0, 5).map((track, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', height: '72px', boxSizing: 'border-box', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
                 <div style={{ position: 'relative', width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: playingPreview === track.preview ? `conic-gradient(var(--brand-primary) ${previewProgress}%, transparent 0)` : 'transparent', padding: playingPreview === track.preview ? '2px' : '0px', transition: 'padding 0.2s' }}
                      onClick={(e) => {
                          if (track.preview) {
@@ -219,7 +231,7 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
                    )}
                   </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <span style={{ fontSize: '15px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.name}</span>
                   <span style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.artist?.['#text'] || track.artist?.name || track.artist}</span>
                 </div>
@@ -229,13 +241,13 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
         </div>
       </div>
 
-      {/* Aesthetic Profile Row */}
+      {/* Top Genres Row */}
       {stats?.top_tags && stats.top_tags.length > 0 && (
         <div className="glass-panel mt-8" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'relative', zIndex: 2 }}>
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '16px' }}>
               <span className="material-symbols-outlined" style={{ color: '#10b981', fontSize: '20px' }}>style</span>
-              Aesthetic Profile
+              Top Genres
             </h3>
             <div className="flex flex-wrap gap-3">
               {stats.top_tags.slice(0, 15).map((tag, i) => (
@@ -251,11 +263,11 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
       {/* Advanced Analytics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         {/* Chronotype Card */}
-        <div className="glass-panel" style={{ padding: '20px', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '12px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '16px' }}>
               <span className="material-symbols-outlined" style={{ color: '#8b5cf6', fontSize: '20px' }}>schedule</span>
-              Audio Rhythm
+              Active Hours
             </h3>
             <div className="text-gradient" style={{ fontSize: '28px', fontFamily: '"Hanken Grotesk"', fontWeight: '800', letterSpacing: '-0.02em', marginBottom: '4px' }}>{stats?.chronotype || 'Unknown'}</div>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Dominant listening time (Last 100 tracks)</div>
@@ -263,11 +275,11 @@ export default function Dashboard({ username, playingPreview, setPlayingPreview,
         </div>
 
         {/* Binge Factor Card */}
-        <div className="glass-panel" style={{ padding: '20px', position: 'relative', overflow: 'hidden' }}>
+        <div className="glass-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '12px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: '"Hanken Grotesk"', margin: 0, marginBottom: '16px' }}>
               <span className="material-symbols-outlined" style={{ color: '#f43f5e', fontSize: '20px' }}>local_fire_department</span>
-              Biggest Binge
+              Longest Streak
             </h3>
             <div className="text-gradient" style={{ fontSize: '28px', fontFamily: '"Hanken Grotesk"', fontWeight: '800', letterSpacing: '-0.02em', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {stats?.binge?.artist || 'None'}
